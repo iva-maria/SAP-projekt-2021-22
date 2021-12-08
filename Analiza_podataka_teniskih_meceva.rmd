@@ -28,6 +28,8 @@ na distribuciju visine igraca koji nisu bili tako uspjesni?
 Kreiramo novu tablicu u koju rangiramo igrace po broju pobjeda, za pocetak. Raspravljali smo o tome da ih rangiramo po postotku pobjeda, ali to nema smisla zbog toga sto netko npr. moze imati 2/2 pobjede, a netko 19/20. (Postaviti pitanje asistentu.)
 
 ```{r}
-pobjednici = as.data.frame(table(tennis[, c("winner_id")]))
-pobjedniciSortirano = data.frame(table(order(pobjednici$Freq, decreasing = TRUE)))
+pobjednici = tennis[c("winner_id", "winner_name")]
+grupiraniPobjednici = subset(as.data.frame(table(pobjednici)), Freq != 0)
+sortiraniPobjednici = grupiraniPobjednici[order(grupiraniPobjednici$Freq, decreasing = TRUE),]
+desetNajboljih = head(sortiraniPobjednici, 10)
 ```
