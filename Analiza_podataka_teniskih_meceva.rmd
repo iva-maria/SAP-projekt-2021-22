@@ -1,0 +1,33 @@
+---
+title: "Analiza podataka teniskih meceva"
+output: pdf_document
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+----------------------------------------------------------------------------------------------------------------------
+
+Ucitavamo podatke.
+
+```{r}
+tennis = read.csv("tennis_atp_matches.csv")
+```
+
+Mozemo li nesto zakljuciti iz distribucije visine najboljih deset igraca u posljednjih 30 godina u odnosu
+na distribuciju visine igraca koji nisu bili tako uspjesni?
+
+Kreiramo novu tablicu u koju rangiramo igrace po broju pobjeda, za pocetak. Raspravljali smo o tome da ih rangiramo po postotku pobjeda, ali to nema smisla zbog toga sto netko npr. moze imati 2/2 pobjede, a netko 19/20. (Postaviti pitanje asistentu.)
+
+```{r}
+pobjednici = as.data.frame(table(tennis[, c("winner_id")]))
+pobjedniciSortirano = data.frame(table(order(pobjednici$Freq, decreasing = TRUE)))
+```
