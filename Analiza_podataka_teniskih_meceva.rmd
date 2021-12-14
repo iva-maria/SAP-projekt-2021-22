@@ -19,17 +19,85 @@ The preview shows you a rendered HTML copy of the contents of the editor. Conseq
 Ucitavamo podatke.
 
 ```{r}
-tennis = read.csv("tennis_atp_matches.csv")
+tennis <- read.csv("tennis_atp_matches.csv")
 ```
 
-Mozemo li nesto zakljuciti iz distribucije visine najboljih deset igraca u posljednjih 30 godina u odnosu
+1) Mozemo li nesto zakljuciti iz distribucije visine najboljih deset igraca u posljednjih 30 godina u odnosu
 na distribuciju visine igraca koji nisu bili tako uspjesni?
 
 Kreiramo novu tablicu u koju rangiramo igrace po broju pobjeda, za pocetak. Raspravljali smo o tome da ih rangiramo po postotku pobjeda, ali to nema smisla zbog toga sto netko npr. moze imati 2/2 pobjede, a netko 19/20. (Postaviti pitanje asistentu.)
 
 ```{r}
-pobjednici = tennis[c("winner_id", "winner_name")]
-grupiraniPobjednici = subset(as.data.frame(table(pobjednici)), Freq != 0)
-sortiraniPobjednici = grupiraniPobjednici[order(grupiraniPobjednici$Freq, decreasing = TRUE),]
-desetNajboljih = head(sortiraniPobjednici, 10)
+pobjednici <- tennis[c("winner_id", "winner_name", "winner_ht")]
+grupiraniPobjednici <- subset(as.data.frame(table(pobjednici)), Freq != 0)
+colnames(grupiraniPobjednici) <- c("player_id", "player_name", "player_ht", "no_of_wins")
+sortiraniPobjednici <- grupiraniPobjednici[order(grupiraniPobjednici$no_of_wins, decreasing = TRUE),]
+desetNajboljih <- head(sortiraniPobjednici, 10)
+```
+
+Problem se pojavio kod traženja igrača koji nisu bili tako uspješni. Naime, nema smisla rangirati ih po najmanjem broju pobjeda, jer će biti puno igrača s 0 ili 1 pobjedom. Isto tako, rangiranje po najmanjem postotku pobjeda ne bi bilo baš sretno rješenje. Iz tog razloga, rangiramo ih po najvećem broju gubitaka i nadamo se da će podaci imati smisla.
+
+Time smo dobili tablicu u kojoj se pojavljuje Andy Murray, što nikako nema smisla. Ovaj kod ispod ne treba gledati!
+
+```{r}
+gubitnici <- tennis[c("loser_id", "loser_name", "loser_ht")]
+grupiraniGubitnici <- subset(as.data.frame(table(gubitnici)), Freq != 0)
+colnames(grupiraniGubitnici) <- c("player_id", "player_name", "player_ht", "no_of_losses")
+sortiraniGubitnici <- grupiraniGubitnici[order(grupiraniGubitnici$no_of_losses, decreasing = TRUE),]
+desetNajlosijih <- head(sortiraniGubitnici, 10)
+```
+
+Sljedeće rješenje, koje smatramo najboljim, jest da 'odsiječemo' igrače s najmanjim brojem mečeva i onda za ostale gledamo najmanji postotak pobjeda.
+
+```{r}
+#full outer join pobjednika i gubitnika
+pobjedeIPorazi <- merge(grupiraniPobjednici, grupiraniGubitnici, all = TRUE)
+
+#mijenja NA s 0 gdje god se pojavljuje da se moze zbrajati
+pobjedeIPorazi[is.na(pobjedeIPorazi)] = 0
+
+#dodajemo novi stupac u kojem pise ukupan broj odigranih meceva
+for (i in 1:nrow(pobjedeIPorazi)) {
+   pobjedeIPorazi$total[i] <- pobjedeIPorazi$no_of_wins[i] + pobjedeIPorazi$no_of_losses[i]
+}
+
+#sortiramo tenisace po ukupnom broju meceva
+pobjedeIPoraziSortirano <- pobjedeIPorazi[order(pobjedeIPorazi$total, decreasing = TRUE),]
+
+#uzimamo samo one koji imaju vise od 100 meceva
+pobjedeIPoraziSortiranoBezNajlosijih <- subset(pobjedeIPoraziSortirano, pobjedeIPoraziSortirano$total >= 100)
+
+#dodajemo novi stupac u kojem pise postotak pobjeda u ukupnom broju meceva
+for(i in 1:nrow(pobjedeIPoraziSortiranoBezNajlosijih)) {
+  pobjedeIPoraziSortiranoBezNajlosijih$win_percentage[i] <- pobjedeIPoraziSortiranoBezNajlosijih$no_of_wins[i] / pobjedeIPoraziSortiranoBezNajlosijih$total[i]
+}
+
+#sortiramo tenisace po postotku pobjeda
+pobjedeIPoraziSortiranoBezNajlosijihSortiranoPoPostotku <- pobjedeIPoraziSortiranoBezNajlosijih[order(pobjedeIPoraziSortiranoBezNajlosijih$win_percentage, decreasing = TRUE),]
+
+#uzmemo one koji imaju <33% pobjede
+najlosiji <- subset(pobjedeIPoraziSortiranoBezNajlosijihSortiranoPoPostotku, pobjedeIPoraziSortiranoBezNajlosijihSortiranoPoPostotku$win_percentage <= 0.34)
+desetNajlosijih <- tail(najlosiji, 10)
+```
+
+Potrebno je sada spojiti igrače s njihovom visinom i odrediti distribuciju tih podataka.
+
+```{r}
+prosjecnaVisinaNajboljih <- mean(as.numeric(as.character(desetNajboljih$player_ht)))
+varijancaVisineNajboljih <- var(as.numeric(as.character(desetNajboljih$player_ht)))
+standardnaDevijacijaVisineNajboljih <- sd(as.numeric(as.character(desetNajboljih$player_ht)))
+```
+
+```{r}
+prosjecnaVisinaNajlosijih <- mean(as.numeric(as.character(desetNajlosijih$player_ht)))
+varijancaVisineNajlosijih <- var(as.numeric(as.character(desetNajlosijih$player_ht)))
+standardnaDevijacijaVisineNajlosijih <- sd(as.numeric(as.character(desetNajlosijih$player_ht)))
+```
+
+Izrađujemo dijagram raspršenja za visinu igrača i postotak pobjeda. Iz nekog razloga, pojavljuju se mali box plotovi unutar scatter plota (pitati asistenta zašto bi to moglo biti).
+
+```{r}
+#x <- pobjedeIPoraziSortiranoBezNajlosijih$player_ht
+#y <- pobjedeIPoraziSortiranoBezNajlosijih$win_percentage
+#plot(x, y, xlab = 'Visina igrača [cm]', ylab = 'Postotak pobjeda')
 ```
