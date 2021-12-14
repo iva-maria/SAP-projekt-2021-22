@@ -34,8 +34,13 @@ sortiraniPobjednici = grupiraniPobjednici[order(grupiraniPobjednici$Freq, decrea
 desetNajboljih = head(sortiraniPobjednici, 10)
 ```
 
-Možemo li na temelju dobitnika prvog seta predvidjeti dobitnika cijelog meča?
+```{r}
+ruke = tennis[c("winner_hand", "loser_hand")]
+razl_ruke = subset(ruke,(as.character(winner_hand)!=as.character(loser_hand) & as.character(loser_hand)!= "U" & as.character(winner_hand)!= "U" & as.character(loser_hand)!= "" & as.character(winner_hand)!= ""))
+grupiraneruke = subset(as.data.frame(table(razl_ruke)), Freq != 0)
+```
 
+Možemo li na temelju dobitnika prvog seta predvidjeti dobitnika cijelog meča?
 ```{r}
 full_sets <- tennis[!grepl("[A-Za-z]", tennis$score),]
 sum(substr(full_sets$score, 1, 1) > substr(full_sets$score, 3, 3)) / nrow(full_sets) 
