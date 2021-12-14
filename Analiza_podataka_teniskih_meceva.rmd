@@ -1,4 +1,4 @@
----
+`---
 title: "Analiza podataka teniskih meceva"
 output: pdf_document
 ---
@@ -100,4 +100,23 @@ Izrađujemo dijagram raspršenja za visinu igrača i postotak pobjeda. Iz nekog 
 #x <- pobjedeIPoraziSortiranoBezNajlosijih$player_ht
 #y <- pobjedeIPoraziSortiranoBezNajlosijih$win_percentage
 #plot(x, y, xlab = 'Visina igrača [cm]', ylab = 'Postotak pobjeda')
+```
+
+```{r}
+pobjednici = tennis[c("winner_id", "winner_name")]
+grupiraniPobjednici = subset(as.data.frame(table(pobjednici)), Freq != 0)
+sortiraniPobjednici = grupiraniPobjednici[order(grupiraniPobjednici$Freq, decreasing = TRUE),]
+desetNajboljih = head(sortiraniPobjednici, 10)
+```
+
+```{r}
+ruke = tennis[c("winner_hand", "loser_hand")]
+razl_ruke = subset(ruke,(as.character(winner_hand)!=as.character(loser_hand) & as.character(loser_hand)!= "U" & as.character(winner_hand)!= "U" & as.character(loser_hand)!= "" & as.character(winner_hand)!= ""))
+grupiraneruke = subset(as.data.frame(table(razl_ruke)), Freq != 0)
+```
+
+Možemo li na temelju dobitnika prvog seta predvidjeti dobitnika cijelog meča?
+```{r}
+full_sets <- tennis[!grepl("[A-Za-z]", tennis$score),]
+sum(substr(full_sets$score, 1, 1) > substr(full_sets$score, 3, 3)) / nrow(full_sets) 
 ```
