@@ -33,3 +33,6 @@ grupiraniPobjednici = subset(as.data.frame(table(pobjednici)), Freq != 0)
 sortiraniPobjednici = grupiraniPobjednici[order(grupiraniPobjednici$Freq, decreasing = TRUE),]
 desetNajboljih = head(sortiraniPobjednici, 10)
 ```
+
+```{r}
+ruke = tennis[c("winner_hand", "loser_hand")]
