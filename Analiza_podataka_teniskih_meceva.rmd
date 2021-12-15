@@ -122,6 +122,13 @@ full_sets <- tennis[!grepl("[A-Za-z]", tennis$score),]
 sum(substr(full_sets$score, 1, 1) > substr(full_sets$score, 3, 3)) / nrow(full_sets)
 ```
 
+```{r}
+unfinished_sets <- tennis[grepl("[A-Za-z]", tennis$score),]
+unfinished_ages <- round(unfinished_sets[c("loser_age")])
+grupirani_unf <- subset(as.data.frame(table(unfinished_ages)), Freq != 0)
+plot(grupirani_unf)
+```
+
 Promatranje napretka najboljih igrača
 
 ```{r}
