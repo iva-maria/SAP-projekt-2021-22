@@ -1,26 +1,85 @@
-`---
-title: "Analiza podataka teniskih meceva"
-output: pdf_document
+---
+title: "**Analiza podataka teniskih mečeva**"
+author: Antonio Babić, Iva Maria Ivanković, Gabrijel Jambrošić, Antun Jurelinac
+date: 14. siječanj 2022.
+output: 
+  pdf_document: 
+    number_sections: yes
+    toc: yes
+toc-title: "Sadržaj"
+toc-depth: 3
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+\newpage
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+# Motivacija i opis problema
+
+Statistička analiza podataka oduvijek je prisutna u sportu. Njome se služe komentatori koji prije neke važne utakmice trebaju naučiti što više činjenica o igraču ili timu, što spada pod deskriptivnu statistiku. Investitori na temelju statistike kluba raspoređuju svoja ulaganja, što za posljedicu može imati napredak kluba ili njegovu potpunu propast. Plaće igrača i njihove cijene na tržištu transfera izravno ovise o njihovoj statistici u prethodnoj sezoni, a kladionice provode iscrpne analize podataka kako bi postavile kvote.
+
+U tenisu je statistika kao alat dobila dodatnu popularnost zahvaljujući bivšem treneru Craigu O'Shaughnessyju, strategu s uporištem u statistici čija je analiza bila ključna u rezultatima Novaka Đokovića protiv njegovih najvećih rivala. Svojim zaključcima izvedenim iz povijesnih podataka mečeva tenisačima je moguće prilagoditi kondicijske pripreme, teniske treninge i strategiju protiv pojedinih protivnika, što rezultira boljom i konzistentnijom igrom.
+
+U nastavku teksta analizirat će se skup podataka o teniskim mečevima i tenisačima te će se iz podataka pokušati izvesti zaključci i pomoću njih odgovoriti na projektna pitanja. Analiza podataka bit će provedena u programskom jeziku *R*, a odabrano okruženje je *RStudio*.
+
+# Opis i učitavanje skupa podataka
+
+## Opis skupa podataka
+
+Podaci se sastoje od svih ATP mečeva odigranih između 1991. i 2020. godine. Svakom igraču pridodano je više značajki kao što su visina, starost, ruka kojom igra, igra li jednoručni ili dvoručni backhand itd. Dodatno je svaki meč opisan s više značajki poput rankinga pobjednika, rankinga gubitnika, trajanja meča, broja winnera pobjednika, broja neprisiljenih grešaka gubitnika, broja spašenih break prilika i sl.
+
+Jedan redak u tablici skupa podataka sadrži podatke raspoređene u sljedeće stupce (ne moraju sve vrijednosti biti definirane): redni broj podatka, identifikacijska oznaka turnira, naziv turnira, vrsta podloge, broj natjecatelja na turniru, razina turnira, datum održavanja turnira, redni broj meča, rezultat meča, broj setova (*best of x*), razina meča (npr. kvalifikacijski, četvrtfinale, finale) i trajanje meča. Informacije o pobjedniku i gubitniku sadržane su u sljedećim stupcima, za svakog od dvojice igrača zasebno: identifikacijska oznaka, jakosna skupina u ždrijebu, \textcolor{red}{entry}, ime i prezime, dominantna ruka, visina, nacionalnost, dob, \textcolor{red}{ace}, \textcolor{red}{df}, \textcolor{red}{svpt}, \textcolor{red}{1stIn}, \textcolor{red}{1stWon}, \textcolor{red}{2ndWon}, \textcolor{red}{svGms}, \textcolor{red}{bpSaved}, \textcolor{red}{bpFaced}, ranking te ranking bodovi.
 
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+## Učitavanje skupa podataka
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
-
-----------------------------------------------------------------------------------------------------------------------
-
-Ucitavamo podatke.
+Zadani skup podataka učitan je iz .csv datoteke *tennis_atp_matches.csv*.
 
 ```{r}
 tennis <- read.csv("tennis_atp_matches.csv")
 ```
+
+Odmah na početku jasno je da su neki od podataka suvišni za analizu koja će biti provedena u sklopu projekta pa će odmah na početku odgovarajući stupci biti eliminirani iz tablice radi bolje preglednosti podataka. To su podaci poput naziva i datuma održavanja turnira te rednog broja meča. \textcolor{red}{Ovdje ćemo kasnije dodati sve stupce koje nismo koristili uz objašnjenje da se tih stupaca naša pitanja ne tiču. Slobodno izbacite neke stupce koji vam ipak trebaju. Zakomentirala sam jer mi inače javlja error koji nisam još skužila zašto se pojavljuje.}
+
+```{r}
+#tennis <- subset(tennis, select = -c(tourney_name, tourney_date, match_num))
+```
+
+\textcolor{red}{Možda ovdje dodati neki summary podataka ako budemo imali vremena i volje.}
+
+# Projektna pitanja
+
+U sklopu zadatka postavljena su četiri pitanja, uz mogućnost postavljanja vlastitih pitanja i pokretanja dodatne problematike vezano za dani skup podataka. \textcolor{red}{U slučaju da ipak nećemo postavljati vlastita pitanja, ovaj dio teksta trebalo bi malo izmijeniti.}
+
+## Zadana pitanja
+
+### Distribucija visine igrača
+
+Postavljeno pitanje bilo je: Možemo li nesto zaključiti iz distribucije visine najboljih deset igrača u posljednjih 30 godina u odnosu na distribuciju visine igrača koji nisu bili tako uspješni?
+
+Kako je u skupu podataka svakom igraču pridružen njegov ranking, taj će se podatak koristiti pri određivanju najuspješnijih igrača. Svake godine igrač dobije novi ranking te se za svaku godinu može odrediti popis deset igrača s najboljim rankingom. Nakon što se prikupe podaci svih trideset godina, profiltriraju se na način da se svaki igrač pojavljuje samo jednom.To je skup podataka koji će se koristiti u analizi i predstavljati najuspješnije igrače. \textcolor{red}{Malo nespretan način izdvajanja odmah na početku. Što ako je visina NA i pretvori se u 1000? Nije se dogodilo, ali treba pripazti na općeniti slučaj.}
+
+```{r}
+rankingRelevantData <- tennis[c("winner_id", "winner_name", "winner_rank", "winner_ht")]
+rankingRelevantData[is.na(rankingRelevantData)] = 1000
+
+#svi igrači koji su u nekom trenutku imali ranking <= 10
+winnersBestRanking <- rankingRelevantData[rankingRelevantData$winner_rank <= 10,]
+
+#izdvajanje relevantnih stupaca
+bestRanking <- winnersBestRanking[c("winner_id", "winner_name", "winner_ht")]
+
+#brisanje duplikata
+mostSuccesfulPlayers <- unique(bestRanking)
+```
+
+Skup igrača koji nisu bili tako uspješni ustvari je skup svih ostalih igrača.
+
+```{r}
+#ovdje kod za izdvajanje neuspješnih igrača
+```
+
+## Vlastita pitanja
+
+***
 
 1) Mozemo li nesto zakljuciti iz distribucije visine najboljih deset igraca u posljednjih 30 godina u odnosu
 na distribuciju visine igraca koji nisu bili tako uspjesni?
