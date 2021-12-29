@@ -53,14 +53,20 @@ U sklopu zadatka postavljena su četiri pitanja, uz mogućnost postavljanja vlas
 
 ### Distribucija visine igrača
 
-Postavljeno pitanje bilo je: Možemo li nesto zaključiti iz distribucije visine najboljih deset igrača u posljednjih 30 godina u odnosu na distribuciju visine igrača koji nisu bili tako uspješni?
+Postavljeno pitanje bilo je: Možemo li nešto zaključiti iz distribucije visine najboljih deset igrača u posljednjih 30 godina u odnosu na distribuciju visine igrača koji nisu bili tako uspješni?
 
 Kako je u skupu podataka svakom igraču pridružen njegov ranking, taj će se podatak koristiti pri određivanju najuspješnijih igrača. Svake godine igrač dobije novi ranking te se za svaku godinu može odrediti popis deset igrača s najboljim rankingom. Nakon što se prikupe podaci svih trideset godina, profiltriraju se na način da se svaki igrač pojavljuje samo jednom.To je skup podataka koji će se koristiti u analizi i predstavljati najuspješnije igrače. \textcolor{red}{Malo nespretan način izdvajanja odmah na početku. Što ako je visina NA i pretvori se u 1000? Nije se dogodilo, ali treba pripazti na općeniti slučaj.}
+
+S obzirom na činjenicu da se u skupu podataka na nekim mjestima pojavljuju igrači kojima nije definiran ranking, postavit ćemo im ranking na 1000 kako ne bi ušli u selekciju igrača s najboljim rankingom. Broj 1000 odabran je donekle proizvoljno - mogao je biti i 11, bitno je da je veći od 10.
 
 ```{r}
 rankingRelevantData <- tennis[c("winner_id", "winner_name", "winner_rank", "winner_ht")]
 rankingRelevantData[is.na(rankingRelevantData)] = 1000
+```
 
+Iz podataka se zatim izvuče popis svih pobjednika mečeva za koje je u bilo kojem meču zabilježen ranking <= 10. Razlog zašto se gledaju samo pobjednici jasan je ako se malo promisli o samom sustavu rangiranja - niti jedan igrač koji je u nekom trenutku bio među najboljom desetoricom nije se mogao ne pojaviti u barem jednom meču kao pobjednik.
+
+```{r}
 #svi igrači koji su u nekom trenutku imali ranking <= 10
 winnersBestRanking <- rankingRelevantData[rankingRelevantData$winner_rank <= 10,]
 
@@ -68,14 +74,47 @@ winnersBestRanking <- rankingRelevantData[rankingRelevantData$winner_rank <= 10,
 bestRanking <- winnersBestRanking[c("winner_id", "winner_name", "winner_ht")]
 
 #brisanje duplikata
-mostSuccesfulPlayers <- unique(bestRanking)
+mostSuccessfulPlayers <- unique(bestRanking)
+colnames(mostSuccessfulPlayers) <- c("player_id", "player_name", "player_ht")
 ```
 
 Skup igrača koji nisu bili tako uspješni ustvari je skup svih ostalih igrača.
 
+Taj popis dobijemo tako što iz tablice s popisom svih igrača izuzmemo one retke koji se nalaze u tablici s popisom najuspješnijih igrača.
+
 ```{r}
-#ovdje kod za izdvajanje neuspješnih igrača
+#popis svih igrača koji imaju barem jednu zabilježenu pobjedu
+winners <- tennis[c("winner_id", "winner_name", "winner_ht")]
+groupedWinners <- subset(as.data.frame(table(winners)), Freq != 0)
+groupedWinners[4] = NULL
+colnames(groupedWinners) <- c("player_id", "player_name", "player_ht")
+
+#popis svih igrača koji imaju barem jedan zabilježen gubitak
+losers <- tennis[c("loser_id", "loser_name", "loser_ht")]
+groupedLosers <- subset(as.data.frame(table(losers)), Freq != 0)
+groupedLosers[4] = NULL
+colnames(groupedLosers) <- c("player_id", "player_name", "player_ht")
+
+#full outer join pobjednika i gubitnika
+allPlayers <- merge(groupedWinners, groupedLosers, all = TRUE)
+
+#izuzimamo igrače koji su među najuspješnijima
+notSoSuccessfulPlayers <- subset(allPlayers, !player_id %in% mostSuccessfulPlayers$player_id)
 ```
+
+\textcolor{red}{Ovdje krećemo s analizom podataka.}
+
+### Odnos ljevaka i dešnjaka
+
+
+
+### Pobjeda prvog seta
+
+
+
+### Predviđanje pobjednika meča
+
+
 
 ## Vlastita pitanja
 
