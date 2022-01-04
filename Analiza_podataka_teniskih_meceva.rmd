@@ -10,6 +10,11 @@ toc-title: "Sadržaj"
 toc-depth: 3
 ---
 
+```{r setup, include = FALSE}
+library(gridExtra)
+fig.width = 5
+```
+
 \newpage
 
 # Motivacija i opis problema
@@ -102,7 +107,64 @@ allPlayers <- merge(groupedWinners, groupedLosers, all = TRUE)
 notSoSuccessfulPlayers <- subset(allPlayers, !player_id %in% mostSuccessfulPlayers$player_id)
 ```
 
-\textcolor{red}{Ovdje krećemo s analizom podataka.}
+Nakon što smo izdvojili najuspješnije i one manje uspješne igrače u skupove podataka ```{r}mostSuccesfulPlayers``` i ```{r}notSoSuccessfulPlayers```, možemo početi s analizom podataka. Za početak, ispisujemo neke osnovne informacije o jednim i drugim igračima kako bi čitatelj dobio sliku. Najvažnije mjere centralne tendencije jesu aritmetička sredina, medijan i mod: \textcolor{red}{Dodati mod.}
+
+```{r}
+summary(mostSuccessfulPlayers$player_ht)
+
+notSoSuccessfulPlayers$player_ht <- as.numeric(as.character(notSoSuccessfulPlayers$player_ht))
+summary(notSoSuccessfulPlayers$player_ht)
+```
+
+Računamo neke osnovne mjere rasipanja podataka - rang, interkvartilni rang, varijancu i standardnu devijaciju - te na taj način uviđamo koliko su visine pojedine skupine igrača međusobno različite. \textcolor{red}{Računa li var() nepristranu varijancu?}
+
+```{r}
+
+```
+
+Vizualiziramo podatke, prvo za najuspješnije igrače, zatim za one manje uspješne.
+
+```{r}
+h_mostSuccesfulPlayers = hist(mostSuccessfulPlayers$player_ht,
+                              main = "Visine najuspješnijih igrača",
+                              xlab = "Visina igrača [cm]",
+                              ylab = "Frekvencija",
+                              breaks = 5,
+                              col = "palegreen")
+```
+
+```{r}
+h_notSoSuccesfulPlayers = hist(notSoSuccessfulPlayers$player_ht,
+                               main = "Visine manje uspješnih igrača",
+                               xlab = "Visina igrača [cm]",
+                               ylab = "Frekvencija",
+                               breaks = 5,
+                               col = "palevioletred")
+```
+
+Ovaj je prikaz dosta grub, ali iz njega i dalje možemo izvući neke zaključke. Naime, usporedbom histograma uviđamo da, iako je visina većine igrača i jedne i druge skupine između 180 i 190 cm, kod onih manje uspješnih igrača broj onih čija je visina manja od 180 cm znatno je veći od onih čija je visina veća od 190 cm, dok to kod najuspješnijih igrača nije slučaj.
+
+Histogram vrijednosti visina najuspješnijih igrača ima zvonolik oblik, a pretpostavka je da bi i histogram vrijednosti visina manje uspješnih igrača imao sličan oblik ako se broj razreda poveća. Da bismo se u to uvjerili, možemo podatke prikazati histogramom s većim brojem razreda:
+
+```{r}
+h2_mostSuccesfulPlayers = hist(mostSuccessfulPlayers$player_ht,
+                              main = "Visine najuspješnijih igrača",
+                              xlab = "Visina igrača [cm]",
+                              ylab = "Frekvencija",
+                              breaks = 10,
+                              col = "palegreen")
+```
+
+```{r}
+h_notSoSuccesfulPlayers = hist(notSoSuccessfulPlayers$player_ht,
+                               main = "Visine manje uspješnih igrača",
+                               xlab = "Visina igrača [cm]",
+                               ylab = "Frekvencija",
+                               breaks = 10,
+                               col = "palevioletred")
+```
+
+\textcolor{red}{Provesti test da dokažemo da visine prate normalnu razdiobu, zatim provesti test da s nekom sigurnošču odredimo aritmetičke sredine visina za najuspješnije i one manje uspješne igrače. Naposlijetku provesti test hipoteze da dvije skupine igrača imaju jednaku srednju visinu.}
 
 ### Odnos ljevaka i dešnjaka
 
