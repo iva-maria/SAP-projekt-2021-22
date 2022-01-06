@@ -281,20 +281,27 @@ Moje pitanje:
 Možemo li reći da je dobitnik prvog seta bolji igrač?
 
 Zadajemo hipotezu H0 koja glasi: Igrači su jednako dobri (odnosno imaju jednaku vjerojatnost dobitka pojedinog seta). Ovdje pretpostavljamo da svi igrači jednako igraju u svim setovima iako će se neki igrači npr. brže umoriti.
-Sada je alternativna hipoteza H1: Igrač koji je dobio prvi set ima veću vjerojatnost pobjede.
+Sada je alternativna hipoteza H1: Igrač koji je dobio prvi set je bolji igrač.
 
 Vjerojatnost da dobitnik prvog seta pobijedi uz uvjet da je H0 istinita je 0,5 + 0,5^2 = 0,75.
 To znači da od n mečeva očekujemo da će dobitnik prvog seta pobijediti u njih 0,75*n.
 Broj takvih mečeva je varijabla podvrgnuta binomnoj razdiobi s parametrima n i p=0,75.
 Budući da mi imamo puno podataka, možemo binomnu razdiobu aproksimirati normalnom s parametrima np i npq.
 
-Bla bla podaci
+Sada možemo hipoteze postaviti na sljedeći način:
+H0 - Vjerojatnost pobjede prvog igrača je 0,75.
+H1 - Vjerojatnost pobjede prvog igrača je veća od 0,75.
+
 ```{r}
+library(BSDA)
 full_sets <- tennis[!grepl("[A-Za-z]", tennis$score),]
 sum(substr(full_sets$score, 1, 1) > substr(full_sets$score, 3, 3)) / nrow(full_sets)
+n = nrow(full_sets)
+p = 0.75
+o = sum(substr(full_sets$score, 1, 1) > substr(full_sets$score, 3, 3))
+pnorm(o, mean = n * p, sd = sqrt(n * p * (1 - p)), lower.tail = FALSE) # il je ful malo il ne treba korijen, nije mi jasno bas
 ```
 
-I ovdje ide taj test.
 
 ```{r}
 unfinished_sets <- tennis[grepl("[A-Za-z]", tennis$score),]
