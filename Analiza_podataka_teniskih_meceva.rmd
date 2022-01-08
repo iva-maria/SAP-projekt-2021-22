@@ -208,6 +208,18 @@ desetNajboljih = head(sortiraniPobjednici, 10)
 ```
 
 ```{r}
+library(rvest)
+strania <- read_html("http://www.tennisdrawchallenge.com/data/list/one-handed-backhand")
+tables <- strania %>% html_table(fill = TRUE)
+jedno_back <- tables[[1]]
+igraci_1HBH <- jedno_back["Name"]
+```
+
+```{r}
+"Denis Shapovalov" %in% igraci_1HBH[["Name"]]
+```
+
+```{r}
 ruke = tennis[c("winner_hand", "loser_hand")]
 razl_ruke = subset(ruke,(as.character(winner_hand)!=as.character(loser_hand) & as.character(loser_hand)!= "U" & as.character(winner_hand)!= "U" & as.character(loser_hand)!= "" & as.character(winner_hand)!= ""))
 grupiraneruke = subset(as.data.frame(table(razl_ruke)), Freq != 0)
