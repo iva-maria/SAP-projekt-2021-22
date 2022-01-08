@@ -271,15 +271,39 @@ desetNajboljih = head(sortiraniPobjednici, 10)
 
 ```{r}
 library(rvest)
-strania <- read_html("http://www.tennisdrawchallenge.com/data/list/one-handed-backhand")
-tables <- strania %>% html_table(fill = TRUE)
+stranica <- read_html("http://www.tennisdrawchallenge.com/data/list/one-handed-backhand")
+tables <- stranica %>% html_table(fill = TRUE)
 jedno_back <- tables[[1]]
 igraci_1HBH <- jedno_back["Name"]
+lista_1HBH = igraci_1HBH[["Name"]]
+jedno_back_mecevi_protiv_L = subset(tennis, ((as.character(winner_name) %in% lista_1HBH & as.character(winner_hand)=="R" & as.character(loser_hand)=="L") | (as.character(loser_name) %in% lista_1HBH & as.character(loser_hand)=="R" & as.character(winner_hand)=="L")))
+jedno_back_mecevi_protiv_R = subset(tennis, ((as.character(winner_name) %in% lista_1HBH & as.character(winner_hand)=="R" & as.character(loser_hand)=="R") | (as.character(loser_name) %in% lista_1HBH & as.character(loser_hand)=="R" & as.character(winner_hand)=="R")))
+rezultati_L <- data.frame(value = numeric())
+rezultati_R <-data.frame(value = numeric())
+
+for (i in 1:nrow(jedno_back_mecevi_protiv_L)){
+  if (as.character(jedno_back_mecevi_protiv_L[i,"winner_name"] %in% lista_1HBH)){
+    rezultati_L[i,"value"] <- 1
+  } else {
+    rezultati_L[i,"value"] <- -1
+  }
+}
+for (i in 1:nrow(jedno_back_mecevi_protiv_R)){
+  if (as.character(jedno_back_mecevi_protiv_R[i,"winner_name"] %in% lista_1HBH)){
+    rezultati_R[i,"value"] <- 1
+  } else {
+    rezultati_R[i,"value"] <- -1
+  }
+}
 ```
 
 ```{r}
-"Denis Shapovalov" %in% igraci_1HBH[["Name"]]
+mean(rezultati_L$value)
+mean(rezultati_R$value)
+t.test(rezultati_L$value, rezultati_R$value, alt="greater")
+
 ```
+
 
 ```{r}
 ruke = tennis[c("winner_hand", "loser_hand")]
