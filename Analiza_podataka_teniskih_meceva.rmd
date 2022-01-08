@@ -293,7 +293,6 @@ H0 - Vjerojatnost pobjede prvog igrača je 0,75.
 H1 - Vjerojatnost pobjede prvog igrača je veća od 0,75.
 
 ```{r}
-library(BSDA)
 full_sets <- tennis[!grepl("[A-Za-z]", tennis$score),]
 sum(substr(full_sets$score, 1, 1) > substr(full_sets$score, 3, 3)) / nrow(full_sets)
 n = nrow(full_sets)
@@ -309,6 +308,17 @@ unfinished_ages <- round(unfinished_sets[c("loser_age")])
 grupirani_unf <- subset(as.data.frame(table(unfinished_ages)), Freq != 0)
 plot(grupirani_unf)
 ```
+
+Ovisnost razlike u ratingu i trajanja meča
+```{r}
+known_ranks = na.omit(full_sets[,c("minutes", "winner_rank", "loser_rank")])
+known_ranks = known_ranks[known_ranks$minutes < 500,]
+known_ranks$rank_dif = abs(known_ranks$winner_rank - known_ranks$loser_rank)
+fit.ranks = lm(minutes~rank_dif, data = known_ranks)
+plot(known_ranks$rank_dif, known_ranks$minutes)
+lines(known_ranks$rank_dif, fit.ranks$fitted.values, col = 'red')
+```
+Tu bi mogli uzet isti test, al samo najduljih 25% meceva...
 
 Promatranje napretka najboljih igrača
 
