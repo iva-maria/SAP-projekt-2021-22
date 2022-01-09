@@ -370,3 +370,47 @@ for(player_id in dimnames(tri_najbolja)[[1]]) {
   plot(godine, pobjede_po_godinama, type="b")
 }
 ```
+
+
+Je li odustajanje od meča nezavisno od vrste podloge na kojoj se on igra?
+
+H0: Podloga teniskog terena i odustajanje od meča su nezavisni.
+H1: Podloga teniskog terena i odustajanje od meča su zavisni.
+```{r}
+podloge <- subset(tennis, as.character(surface)!="")
+podloge <- droplevels(podloge)
+podloge$score <- ifelse(grepl("RET", podloge$score), "Retired", "Not retired")
+```
+
+Pogledajmo kontingencijsku tablicu varijabli podloge i odustajanja od meča
+```{r}
+tbl = table(podloge$surface, podloge$score)
+tbl
+```
+
+Kontingencijskoj tablici dodajemo sume redaka i stupaca:
+```{r}
+added_margins_tbl = addmargins(tbl)
+print(added_margins_tbl)
+```
+
+# promijenit malo tekst jer je prepisan
+Test nezavisnosti $\chi^2$ test u programskom paketu R implementiran je u funkciji `chisq.test()` koja kao ulaz prima kontingencijsku tablicu podataka koje testiramo na nezavisnost. Ispitat ćemo nezavisnost podloge teniskog terena i odustajanja od meča.
+
+Pretpostavka testa je da očekivana frekvencija pojedinog razreda mora biti veća ili jednaka 5 (`chisq.test()` pretpostavlja da je ovaj uvjet zadovoljen stoga je prije provođenja testa potrebno to provjeriti).
+```{r}
+for (col_names in colnames(added_margins_tbl)){
+  for (row_names in rownames(added_margins_tbl)){
+    if (!(row_names == 'Sum' | col_names == 'Sum') ){
+      cat('Očekivane frekvencije za razred ',col_names,'-',row_names,': ',(added_margins_tbl[row_names,'Sum'] * added_margins_tbl['Sum',col_names]) / added_margins_tbl['Sum','Sum'],'\n')
+    }
+  }
+}
+```
+
+
+Očekivane frekvencije su veće od 5 što znači da možemo nastaviti sa $\chi^2$ testom.
+```{r}
+chisq.test(tbl,correct=F)
+```
+Odbacujemo H0 u korist H1 koja kaže da su podloga teniskog terena i odustajanje od meča zavisni.
