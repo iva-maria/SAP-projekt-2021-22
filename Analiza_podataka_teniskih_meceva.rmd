@@ -364,13 +364,29 @@ H1 - Vjerojatnost pobjede prvog igrača je veća od 0,75.
 
 ```{r}
 full_sets <- tennis[!grepl("[A-Za-z]", tennis$score),]
-sum(substr(full_sets$score, 1, 1) > substr(full_sets$score, 3, 3)) / nrow(full_sets)
-n = nrow(full_sets)
-p = 0.75
-o = sum(substr(full_sets$score, 1, 1) > substr(full_sets$score, 3, 3))
-pnorm(o, mean = n * p, sd = sqrt(n * p * (1 - p)), lower.tail = FALSE) # il je ful malo il ne treba korijen, nije mi jasno bas
+to_kaj_ocu = gregexpr(pattern = '-', full_sets$score)
+i = 1
+first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on = full_sets[FALSE,]
+for(to in to_kaj_ocu) {
+  if((length(to) == 2 || (length(to) == 3 &&
+        ((substr(full_sets[i,]$score, to[1] - 1, to[1] - 1) < substr(full_sets[i,]$score, to[1] + 1, to[1] + 1))
+      || (substr(full_sets[i,]$score, to[2] - 1, to[2] - 1) < substr(full_sets[i,]$score, to[2] + 1, to[2] + 1))))) == TRUE) {
+    first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on[
+      nrow(first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on) + 1,
+    ] = full_sets[i,]
+  }
+  i = i + 1
+  if(i %% 10000 == 0) print(i)
+}
 ```
 
+```{r}
+sum(substr(first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on$score, 1, 1) > substr(first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on$score, 3, 3)) / nrow(first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on)
+n = nrow(first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on)
+p = 0.75
+o = sum(substr(first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on$score, 1, 1) > substr(first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on$score, 3, 3))
+pnorm(o, mean = n * p, sd = sqrt(n * p * (1 - p)), lower.tail = FALSE)
+```
 
 ```{r}
 unfinished_sets <- tennis[grepl("[A-Za-z]", tennis$score),]
