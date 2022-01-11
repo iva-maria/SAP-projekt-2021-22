@@ -350,6 +350,10 @@ mean(rezultati_R$value)
 ruke = tennis[c("winner_hand", "loser_hand")]
 razl_ruke = subset(ruke,(as.character(winner_hand)!=as.character(loser_hand) & as.character(loser_hand)!= "U" & as.character(winner_hand)!= "U" & as.character(loser_hand)!= "" & as.character(winner_hand)!= ""))
 grupiraneruke = subset(as.data.frame(table(razl_ruke)), Freq != 0)
+grupiraneruke$Freq[1]/nrow(razl_ruke)
+grupiraneruke$Freq[2]/nrow(razl_ruke)
+pnorm(grupiraneruke$Freq[1]/nrow(razl_ruke), mean = nrow(razl_ruke) * 0.5, sd = sqrt(nrow(razl_ruke) * 0.25), lower.tail = TRUE)
+
 ```
 
 Možemo li na temelju dobitnika prvog seta predvidjeti dobitnika cijelog meča?
