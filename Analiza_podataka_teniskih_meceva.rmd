@@ -364,6 +364,7 @@ Možemo li reći da je dobitnik prvog seta bolji igrač?
 Zadajemo hipotezu H0 koja glasi: Igrači su jednako dobri (odnosno imaju jednaku vjerojatnost dobitka pojedinog seta). Ovdje pretpostavljamo da svi igrači jednako igraju u svim setovima iako će se neki igrači npr. brže umoriti.
 Sada je alternativna hipoteza H1: Igrač koji je dobio prvi set je bolji igrač.
 
+U nastavku promatramo samo best of 3 mečeve.
 Vjerojatnost da dobitnik prvog seta pobijedi uz uvjet da je H0 istinita je 0,5 + 0,5^2 = 0,75.
 To znači da od n mečeva očekujemo da će dobitnik prvog seta pobijediti u njih 0,75*n.
 Broj takvih mečeva je varijabla podvrgnuta binomnoj razdiobi s parametrima n i p=0,75.
@@ -373,31 +374,33 @@ Sada možemo hipoteze postaviti na sljedeći način:
 H0 - Vjerojatnost pobjede prvog igrača je 0,75.
 H1 - Vjerojatnost pobjede prvog igrača je veća od 0,75.
 
-```{r}
-full_sets <- tennis[!grepl("[A-Za-z]", tennis$score),]
-to_kaj_ocu = gregexpr(pattern = '-', full_sets$score)
-i = 1
-first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on = full_sets[FALSE,]
-for(to in to_kaj_ocu) {
-  if((length(to) == 2 || (length(to) == 3 &&
-        ((substr(full_sets[i,]$score, to[1] - 1, to[1] - 1) < substr(full_sets[i,]$score, to[1] + 1, to[1] + 1))
-      || (substr(full_sets[i,]$score, to[2] - 1, to[2] - 1) < substr(full_sets[i,]$score, to[2] + 1, to[2] + 1))))) == TRUE) {
-    first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on[
-      nrow(first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on) + 1,
-    ] = full_sets[i,]
-  }
-  i = i + 1
-  if(i %% 10000 == 0) print(i)
-}
-```
+Izračunajmo sada postotak mečeva u kojem je dobitnik prvog seta dobio meč te p-vrijednost za distribuciju N(np, npq), gdje je p=0,75, a q=0,25.
 
 ```{r}
-sum(substr(first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on$score, 1, 1) > substr(first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on$score, 3, 3)) / nrow(first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on)
-n = nrow(first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on)
+full_sets <- tennis[!grepl("[A-Za-z]", tennis$score),]
+#to_kaj_ocu = gregexpr(pattern = '-', full_sets$score)
+#i = 1
+#first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on = full_sets[FALSE,]
+#for(to in to_kaj_ocu) {
+#  if((length(to) == 2 || (length(to) == 3 &&
+#        ((substr(full_sets[i,]$score, to[1] - 1, to[1] - 1) < substr(full_sets[i,]$score, to[1] + 1, to[1] + 1))
+#      || (substr(full_sets[i,]$score, to[2] - 1, to[2] - 1) < substr(full_sets[i,]$score, to[2] + 1, to[2] + 1))))) == TRUE) {
+#    first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on[
+#      nrow(first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on) + 1,
+#    ] = full_sets[i,]
+#  }
+#  i = i + 1
+#  if(i %% 10000 == 0) print(i)
+#}
+bo3 = full_sets[full_sets$best_of == 3,]
+sum(substr(bo3$score, 1, 1) > substr(bo3$score, 3, 3)) / nrow(bo3)
+n = nrow(bo3)
 p = 0.75
-o = sum(substr(first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on$score, 1, 1) > substr(first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on$score, 3, 3))
+o = sum(substr(bo3$score, 1, 1) > substr(bo3$score, 3, 3))
 pnorm(o, mean = n * p, sd = sqrt(n * p * (1 - p)), lower.tail = FALSE)
 ```
+Vidimo da postotak takvih mečeva iznosi otprilike 82%. p-vrijednost je praktički 0.
+Odbacujemo H0 i zaključujemo da su dobitnici prvog seta u prosjeku bolji igrači (imaju veću vjerojatnost dobitka pojedinog seta).
 
 ```{r}
 unfinished_sets <- tennis[grepl("[A-Za-z]", tennis$score),]
@@ -406,16 +409,20 @@ grupirani_unf <- subset(as.data.frame(table(unfinished_ages)), Freq != 0)
 plot(grupirani_unf)
 ```
 
-Ovisnost razlike u ratingu i trajanja meča
+Promotrimo vezu između razlike u rangu i trajanja meča.
+Pretpostavka je da igrači sličnijeg ranga igraju dulje mečeve.
+
 ```{r}
+library(dplyr)
 known_ranks = na.omit(full_sets[,c("minutes", "winner_rank", "loser_rank")])
-known_ranks = known_ranks[known_ranks$minutes < 500,]
+known_ranks = arrange(known_ranks[known_ranks$minutes < 500,], desc(minutes)) # 700
 known_ranks$rank_dif = abs(known_ranks$winner_rank - known_ranks$loser_rank)
 fit.ranks = lm(minutes~rank_dif, data = known_ranks)
 plot(known_ranks$rank_dif, known_ranks$minutes)
 lines(known_ranks$rank_dif, fit.ranks$fitted.values, col = 'red')
 ```
-Tu bi mogli uzet isti test, al samo najduljih 25% meceva...
+
+bla bla
 
 Promatranje napretka najboljih igrača
 
