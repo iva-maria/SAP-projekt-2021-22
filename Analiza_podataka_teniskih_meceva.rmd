@@ -59,7 +59,7 @@ summary(tennis)
 
 # Projektna pitanja
 
-U sklopu zadatka postavljena su četiri pitanja, uz mogućnost postavljanja vlastitih pitanja i pokretanja dodatne problematike vezano za dani skup podataka. Sva su pitanja vezana uz gradivo koje se obrađuje na predmetu Statistička analiza podataka na Fakultetu elektrotehnike i računarstva.
+U sklopu zadatka postavljena su određena pitanja, uz mogućnost postavljanja vlastitih pitanja i pokretanja dodatne problematike vezano za dani skup podataka. Sva su pitanja vezana uz gradivo koje se obrađuje na predmetu Statistička analiza podataka na Fakultetu elektrotehnike i računarstva.
 
 ## Zadana pitanja
 
@@ -67,7 +67,7 @@ U sklopu zadatka postavljena su četiri pitanja, uz mogućnost postavljanja vlas
 
 Postavljeno pitanje bilo je: Možemo li nešto zaključiti iz distribucije visine najboljih deset igrača u posljednjih 30 godina u odnosu na distribuciju visine igrača koji nisu bili tako uspješni?
 
-Kako je u skupu podataka svakom igraču pridružen njegov ranking, taj će se podatak koristiti pri određivanju najuspješnijih igrača. Svake godine igrač dobije novi ranking te se za svaku godinu može odrediti popis deset igrača s najboljim rankingom. Nakon što se prikupe podaci svih trideset godina, profiltriraju se na način da se svaki igrač pojavljuje samo jednom.To je skup podataka koji će se koristiti u analizi i predstavljati najuspješnije igrače. \textcolor{red}{Malo nespretan način izdvajanja odmah na početku. Što ako je visina NA i pretvori se u 1000? Nije se dogodilo, ali treba pripazti na općeniti slučaj.}
+Kako je u skupu podataka svakom igraču pridružen njegov ranking, taj će se podatak koristiti pri određivanju najuspješnijih igrača. Svake godine igrač dobije novi ranking te se za svaku godinu može odrediti popis deset igrača s najboljim rankingom. Nakon što se prikupe podaci svih trideset godina, profiltriraju se na način da se svaki igrač pojavljuje samo jednom.To je skup podataka koji će se koristiti u analizi i predstavljati najuspješnije igrače.
 
 S obzirom na činjenicu da se u skupu podataka na nekim mjestima pojavljuju igrači kojima nije definiran ranking, postavit ćemo im ranking na 1000 kako ne bi ušli u selekciju igrača s najboljim rankingom. Broj 1000 odabran je donekle proizvoljno - mogao je biti i 11, bitno je da je veći od 10.
 
@@ -114,19 +114,13 @@ allPlayers <- merge(groupedWinners, groupedLosers, all = TRUE)
 notSoSuccessfulPlayers <- subset(allPlayers, !player_id %in% mostSuccessfulPlayers$player_id)
 ```
 
-Nakon što smo izdvojili najuspješnije i one manje uspješne igrače u skupove podataka ```mostSuccesfulPlayers``` i ```notSoSuccessfulPlayers```, možemo početi s analizom podataka. Za početak, ispisujemo neke osnovne informacije o jednim i drugim igračima kako bi čitatelj dobio sliku. Najvažnije mjere centralne tendencije jesu aritmetička sredina, medijan i mod: \textcolor{red}{Dodati mod.}
+Nakon što smo izdvojili najuspješnije i one manje uspješne igrače u skupove podataka ```mostSuccesfulPlayers``` i ```notSoSuccessfulPlayers```, možemo početi s analizom podataka. Za početak, ispisujemo neke osnovne informacije o jednim i drugim igračima kako bi čitatelj dobio sliku. Primjeri važnijih mjera centralne tendencije jesu aritmetička sredina i medijan.
 
 ```{r}
 summary(mostSuccessfulPlayers$player_ht)
 
 notSoSuccessfulPlayers$player_ht <- as.numeric(as.character(notSoSuccessfulPlayers$player_ht))
 summary(notSoSuccessfulPlayers$player_ht)
-```
-
-Računamo neke osnovne mjere rasipanja podataka - rang, interkvartilni rang, varijancu i standardnu devijaciju - te na taj način uviđamo koliko su visine pojedine skupine igrača međusobno različite. \textcolor{red}{Računa li var() nepristranu varijancu?}
-
-```{r}
-
 ```
 
 Vizualiziramo podatke, prvo za najuspješnije igrače, zatim za one manje uspješne.
@@ -261,8 +255,16 @@ lista_1HBH = igraci_1HBH[["Name"]]
 Pomoću dobivenog popisa, svi mečevi bit će izdvojeni u dvije tablice. U jednoj će biti mečevi između igrača koji su dešnjaci i preferiraju jednoručni backhand i igrača koji su ljevaci, a u drugoj tablici će biti biti mečevi između igrača koji su dešnjaci i preferiraju jednoručni backhand i igrača koji su dešnjaci, ali ne igraju jednoručnim backhandom.
 
 ```{r}
-jedno_back_mecevi_protiv_L = subset(tennis, ((as.character(winner_name) %in% lista_1HBH & !(as.character(loser_name) %in% lista_1HBH) & as.character(winner_hand)=="R" & as.character(loser_hand)=="L") | (as.character(loser_name) %in% lista_1HBH & as.character(loser_hand)=="R" & as.character(winner_hand)=="L" & !(as.character(winner_name) %in% lista_1HBH) )))
-jedno_back_mecevi_protiv_R = subset(tennis, ((as.character(winner_name) %in% lista_1HBH & as.character(winner_hand)=="R" & as.character(loser_hand)=="R") | (as.character(loser_name) %in% lista_1HBH & as.character(loser_hand)=="R" & as.character(winner_hand)=="R")))
+jedno_back_mecevi_protiv_L = subset(tennis, ((as.character(winner_name) %in% lista_1HBH & 
+                                        !(as.character(loser_name) %in% lista_1HBH) & 
+                                        as.character(winner_hand)=="R" & as.character(loser_hand)=="L") |
+                                        (as.character(loser_name) %in% lista_1HBH &
+                                          as.character(loser_hand)=="R" & as.character(winner_hand)=="L" &
+                                          !(as.character(winner_name) %in% lista_1HBH) )))
+jedno_back_mecevi_protiv_R = subset(tennis, ((as.character(winner_name) %in% lista_1HBH &
+                                        as.character(winner_hand)=="R" & as.character(loser_hand)=="R") |
+                                        (as.character(loser_name) %in% lista_1HBH &
+                                          as.character(loser_hand)=="R" & as.character(winner_hand)=="R")))
 ```
 
 Sada je potrebno proći kroz sve pojedine mečeve i provjeriti jesu li igrači s jednoručnim backhandom pobjedili(1) ili izgubili (-1).
@@ -309,45 +311,33 @@ p-vrijednost manja od 0.01 upućuje na odbacivanje nulte hipoteze u korist prve 
 
 ```{r}
 ruke = tennis[c("winner_hand", "loser_hand")]
-razl_ruke = subset(ruke,(as.character(winner_hand)!=as.character(loser_hand) & as.character(loser_hand)!= "U" & as.character(winner_hand)!= "U" & as.character(loser_hand)!= "" & as.character(winner_hand)!= ""))
+razl_ruke = subset(ruke,(as.character(winner_hand)!=as.character(loser_hand) & 
+                           as.character(loser_hand)!= "U" & 
+                           as.character(winner_hand)!= "U" & 
+                           as.character(loser_hand)!= "" & 
+                           as.character(winner_hand)!= ""))
 grupiraneruke = subset(as.data.frame(table(razl_ruke)), Freq != 0)
 grupiraneruke$Freq[1]/nrow(razl_ruke)
 grupiraneruke$Freq[2]/nrow(razl_ruke)
-pnorm(grupiraneruke$Freq[1]/nrow(razl_ruke), mean = nrow(razl_ruke) * 0.5, sd = sqrt(nrow(razl_ruke) * 0.25), lower.tail = TRUE)
-
 ```
 
 ### Pobjeda prvog seta
 
+Postavljeno pitanje bilo je: Možemo li na temelju dobitnika prvog seta predvidjeti dobitnika cijelog meča? Ono je također preoblikovano te se u ovom dijelu zapravo ispituje možemo li reći da je dobitnik prvog seta bolji igrač.
 
+Zadana je nulta hipoteza koja glasi da su igrači jednako dobri odnosno imaju jednaku vjerojatnost dobitka pojedinog seta. Ovdje pretpostavljamo da svi igrači jednako igraju u svim setovima, iako će se neki igrači npr. brže umoriti.
+Sada je alternativna hipoteza da je igrač koji je dobio prvi set bolji igrač.
 
-### Predviđanje pobjednika meča
-
-
-
-## Vlastita pitanja
-
-***
-
-Možemo li na temelju dobitnika prvog seta predvidjeti dobitnika cijelog meča?
-
-Moje pitanje:
-Možemo li reći da je dobitnik prvog seta bolji igrač?
-
-Zadajemo hipotezu H0 koja glasi: Igrači su jednako dobri (odnosno imaju jednaku vjerojatnost dobitka pojedinog seta). Ovdje pretpostavljamo da svi igrači jednako igraju u svim setovima iako će se neki igrači npr. brže umoriti.
-Sada je alternativna hipoteza H1: Igrač koji je dobio prvi set je bolji igrač.
-
-U nastavku promatramo samo best of 3 mečeve.
-Vjerojatnost da dobitnik prvog seta pobijedi uz uvjet da je H0 istinita je 0,5 + 0,5^2 = 0,75.
-To znači da od n mečeva očekujemo da će dobitnik prvog seta pobijediti u njih 0,75*n.
-Broj takvih mečeva je varijabla podvrgnuta binomnoj razdiobi s parametrima n i p=0,75.
-Budući da mi imamo puno podataka, možemo binomnu razdiobu aproksimirati normalnom s parametrima np i npq.
+U nastavku promatramo samo *best of 3* mečeve. Vjerojatnost da dobitnik prvog seta pobijedi uz uvjet da je H0 istinita je $0,5 + 0,5^2 = 0,75$. To znači da od $n$ mečeva očekujemo da će dobitnik prvog seta pobijediti u njih $0,75 * n$. Broj takvih mečeva je varijabla podvrgnuta binomnoj razdiobi s parametrima $n$ i $p = 0,75$. Budući da nam je na raspolaganju mnoštvo podataka, možemo binomnu razdiobu aproksimirati normalnom s parametrima $np$ i $npq$.
 
 Sada možemo hipoteze postaviti na sljedeći način:
-H0 - Vjerojatnost pobjede prvog igrača je 0,75.
-H1 - Vjerojatnost pobjede prvog igrača je veća od 0,75.
+$$ \begin{aligned}
+H_0&: p = 0,75\\
+H_1&: p > 0,75
+\end{aligned} $$
+gdje je $p$ vjerojatnost pobjede prvog igrača odnosno onoga koji je odnio pobjedu u prvom setu.
 
-Izračunajmo sada postotak mečeva u kojem je dobitnik prvog seta dobio meč te p-vrijednost za distribuciju N(np, npq), gdje je p=0,75, a q=0,25.
+Izračunajmo sada postotak mečeva u kojem je dobitnik prvog seta dobio meč te p-vrijednost za distribuciju $N(np, npq)$, gdje je $p = 0,75$, a $q = 0,25$.
 
 ```{r}
 full_sets <- tennis[!grepl("[A-Za-z]", tennis$score),]
@@ -359,10 +349,11 @@ o = sum(substr(bo3$score, 1, 1) > substr(bo3$score, 3, 3))
 print(podatkovna_vjerojatnost)
 pnorm(o, mean = n * p, sd = sqrt(n * p * (1 - p)), lower.tail = FALSE)
 ```
-Vidimo da postotak takvih mečeva iznosi otprilike 82%. p-vrijednost je praktički 0.
-Odbacujemo H0 na jako velikoj razini značajnosti i zaključujemo da su dobitnici prvog seta u prosjeku bolji igrači (imaju veću vjerojatnost dobitka pojedinog seta).
+
+Vidimo da postotak takvih mečeva iznosi otprilike 82%; p-vrijednost je praktički 0. Odbacujemo nultu hipotezu na jako velikoj razini značajnosti i zaključujemo da su dobitnici prvog seta u prosjeku bolji igrači (imaju veću vjerojatnost dobitka pojedinog seta).
 
 Rezultate ovog testa možemo prikazati i grafički:
+
 ```{r}
 p1 <- hist(rep(1, times = n * p))
 p2 <- hist(rep(1, times = o))
@@ -370,12 +361,12 @@ plot(p2, col=rgb(0,1,0,1/2), add=T)
 plot(p1, col=rgb(0,0,1,1/2), add=T)
 ```
 
-Zelenom bojom je prikazan višak opaženih u odnosu na očekivane mečeve. Razlika je manja od 5000 mečeva, ali je s danim parametrima distribucije i više nego dovoljna da opovrgne H0.
+Zelenom bojom je prikazan višak opaženih u odnosu na očekivane mečeve. Razlika je manja od 5000 mečeva, ali je s danim parametrima distribucije i više nego dovoljna da opovrgne $H_0$.
 
-Promotrimo vezu između razlike u rangu i trajanja meča.
-Pretpostavka je da igrači sličnijeg ranga igraju dulje mečeve.
+Promotrimo vezu između razlike u rangu i trajanja meča - pretpostavka je da igrači sličnijeg ranga igraju dulje mečeve.
 
 Izdvajanje podataka i grafiranje:
+
 ```{r}
 library(dplyr)
 known_ranks = na.omit(bo3[,c("minutes", "winner_rank", "loser_rank")])
@@ -404,33 +395,39 @@ Pogledamo li histograme reziduala, vidimo da su nakošeni, ali poznato je da je 
 summary(fit)
 ```
 
-Kao što vidimo, dobivamo vrlo mali R^2 te ne možemo zaključiti da su varijable linearno zavisne. Preduvjeti nisu bili dobri, a prividan padajući trend možemo objasniti i brojem odigranih mečeva u kojima su igrači imali sličan rang. Naime, veći ekstremi se prirodno postižu na mjestima brojnijeg uzorkovanja.
-Na grafu možemo uočiti gornju envelopu koja uistinu ima padajući trend, ali također postoji i donja envelopa koja nema takav trend. Mečevi blizu gornje envelope su rijetki i ne utječu toliko na regresiju koliko utječu oni drugi, čisto zbog svoje brojnosti.
+Kao što vidimo, dobivamo vrlo mali $R^2$ te ne možemo zaključiti da su varijable linearno zavisne. Preduvjeti nisu bili dobri, a prividan padajući trend možemo objasniti i brojem odigranih mečeva u kojima su igrači imali sličan rang. Naime, veći ekstremi se prirodno postižu na mjestima brojnijeg uzorkovanja. Na grafu možemo uočiti gornju envelopu koja uistinu ima padajući trend, ali također postoji i donja envelopa koja nema takav trend. Mečevi blizu gornje envelope su rijetki i ne utječu toliko na regresiju koliko utječu oni drugi, čisto zbog svoje brojnosti.
 
-Da bi se uvjerili da je ovaj prividan padajući trend uistinu rezultat neravnomjernoj raspoređenosti podataka po horizontalnoj osi, razmotrimo sljedeći graf:
+Da bismo se uvjerili da je ovaj prividan padajući trend uistinu rezultat neravnomjerne raspoređenosti podataka po horizontalnoj osi, razmotrimo sljedeći graf:
+
 ```{r}
 hist(known_ranks$rank_dif)
 ```
 
-Graf potvrđuje tu teoriju.
+koji potvrđuje tu teoriju.
 
-Je li odustajanje od meča nezavisno od vrste podloge na kojoj se on igra?
+## Vlastita pitanja
 
-H0: Podloga teniskog terena i odustajanje od meča su nezavisni.
-H1: Podloga teniskog terena i odustajanje od meča su zavisni.
+### Vrsta podloge
+
+Postavljeno pitanje bilo je: Je li odustajanje od meča nezavisno od vrste podloge na kojoj se on igra?
+
+Postavljena je nulta hipoteza koja glasi da su podloga teniskog terena i odustajanje od meča nezavisne varijable, dok je alternativa da su to zavisne varijable.
+
 ```{r}
 podloge <- subset(tennis, as.character(surface)!="")
 podloge <- droplevels(podloge)
 podloge$score <- ifelse(grepl("RET", podloge$score), "Retired", "Not retired")
 ```
 
-Pogledajmo kontingencijsku tablicu varijabli podloge i odustajanja od meča
+Pogledajmo kontingencijsku tablicu varijabli podloge i odustajanja od meča:
+
 ```{r}
 tbl = table(podloge$surface, podloge$score)
 tbl
 ```
 
 Kontingencijskoj tablici dodajemo sume redaka i stupaca:
+
 ```{r}
 added_margins_tbl = addmargins(tbl)
 print(added_margins_tbl)
@@ -439,6 +436,7 @@ print(added_margins_tbl)
 Test nezavisnosti $\chi^2$ test u programskom paketu R implementiran je u funkciji `chisq.test()` koja kao ulaz prima kontingencijsku tablicu podataka koje testiramo na nezavisnost. Ispitat ćemo nezavisnost podloge teniskog terena i odustajanja od meča.
 
 Pretpostavka testa je da očekivana frekvencija pojedinog razreda mora biti veća ili jednaka 5 (`chisq.test()` pretpostavlja da je ovaj uvjet zadovoljen stoga je prije provođenja testa potrebno to provjeriti).
+
 ```{r}
 for (col_names in colnames(added_margins_tbl)){
   for (row_names in rownames(added_margins_tbl)){
@@ -449,32 +447,19 @@ for (col_names in colnames(added_margins_tbl)){
 }
 ```
 
+Očekivane frekvencije veće su od 5, što znači da možemo nastaviti sa $\chi^2$ testom.
 
-Očekivane frekvencije su veće od 5 što znači da možemo nastaviti sa $\chi^2$ testom.
 ```{r}
 chisq.test(tbl,correct=F)
 ```
-Odbacujemo H0 u korist H1 koja kaže da su podloga teniskog terena i odustajanje od meča zavisni.
 
-#Čilić
+Odbacujemo $H_0$ u korist $H_1$ i zaključujemo da su podloga teniskog terena i odustajanje igrača od meča međusobno zavisni.
 
-```{r}
-cilic = subset(tennis,(as.character(winner_name)=="Marin Cilic" | as.character(loser_name) == "Marin Cilic"))
-cilic_bof_5 = subset(cilic, as.character(best_of)=="5")
-cilic_superloss = subset(cilic_loss, substr(cilic_loss$score,1,1) < substr(cilic_loss$score,3,3))
-cilic_superduperLoss = 4
-```
+## Dodatak
 
-TODO Antonio opis
+### Promatranje napretka najboljih igrača
 
-```{r}
-unfinished_sets <- tennis[grepl("[A-Za-z]", tennis$score),]
-unfinished_ages <- round(unfinished_sets[c("loser_age")])
-grupirani_unf <- subset(as.data.frame(table(unfinished_ages)), Freq != 0)
-plot(grupirani_unf)
-```
-
-Promatranje napretka najboljih igrača
+U raspravi o setu podataka i eventualnim dodatnim pitanjima koja bi se mogla nametnuti, došlo se na ideju praćenja napretka najboljih tenisača u zadnjih 30 godina. Ovdje su rezultati analize:
 
 ```{r}
 tri_najbolja <- sort(table(tennis$winner_id), decreasing=TRUE)[1:3]
@@ -490,3 +475,19 @@ for(player_id in dimnames(tri_najbolja)[[1]]) {
 ```
 
 Možemo vidjeti da najbolji igrači imaju rast prvih 5 do 10 godina, a onda manje više stagniraju.
+
+### Marin Čilić
+
+```{r}
+cilic = subset(tennis,(as.character(winner_name)=="Marin Cilic" | as.character(loser_name) == "Marin Cilic"))
+cilic_bof_5 = subset(cilic, as.character(best_of)=="5")
+cilic_loss = subset(cilic_bof_5, as.character(loser_name) == "Marin Cilic")
+cilic_superloss = subset(cilic_loss, substr(cilic_loss$score,1,1) < substr(cilic_loss$score,3,3))
+cilic_superduperLoss = 4
+```
+
+# Zaključak
+
+Analiza podataka teniskih mečeva iznjedrila je neke zanimljive zaključke. S obzirom na veličinu skupa podataka i broj varijabli koje se u njemu pojavljuju, bio je velik izazov uopće i razumjeti što sve te varijable znače, a kamoli analizirati svaku sa svojim eventualnim ovisnostima. Ipak, neka od projektnih pitanja dobila su pripadne odgovore, od kojih su neki bili i iznenađujući.
+
+U nastavku rada na projektu moglo bi se analizirati pojedine tenisače i njihove karijere. Primjerice, pojedini mečevi hrvatskog tenisača Marina Čilića mogli bi zadati pravu glavobolju ne samo onima koji ih gledaju, već i onima koji bi na temelju rezultata pokušali izvesti bilo kakve zaključke ili predviđanja. To je, pak, posao za nekog vrsnog poznavatelja tenisa, koji bi se tako mogao i dobro zabaviti.
