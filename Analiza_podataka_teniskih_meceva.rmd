@@ -423,17 +423,32 @@ plot(grupirani_unf)
 Promotrimo vezu između razlike u rangu i trajanja meča.
 Pretpostavka je da igrači sličnijeg ranga igraju dulje mečeve.
 
+Izdvajanje podataka i grafiranje:
 ```{r}
 library(dplyr)
 known_ranks = na.omit(bo3[,c("minutes", "winner_rank", "loser_rank")])
-known_ranks = arrange(known_ranks[known_ranks$minutes < 500,], desc(minutes)) # 700
+known_ranks = arrange(known_ranks[known_ranks$minutes < 500,], desc(minutes)) # postoje par nerealnih mečeva preko 1000 minuta
 known_ranks$rank_dif = abs(known_ranks$winner_rank - known_ranks$loser_rank)
-fit.ranks = lm(minutes~rank_dif, data = known_ranks)
-plot(known_ranks$rank_dif, known_ranks$minutes)
-lines(known_ranks$rank_dif, fit.ranks$fitted.values, col = 'red')
 ```
 
-bla bla
+Vidimo da podaci imaju padajući trend, ali također vidimo i kratke mečeve slično rangiranih igrača. To možemo objasniti količinom podatka, pogotovo onih gdje su igrači sličnog ranga. Zato ćemo nastaviti s provođenjem regresijskog testa.
+
+Izgradimo sada regresijski model:
+```{r}
+fit = lm(minutes~rank_dif, data = known_ranks)
+plot(known_ranks$rank_dif, known_ranks$minutes)
+lines(known_ranks$rank_dif, fit$fitted.values, col = 'red')
+```
+
+```{r}
+plot(fit$residuals)
+hist(fit$residuals)
+hist(rstandard(fit))
+qqnorm(rstandard(fit))
+qqline(rstandard(fit))
+require(nortest)
+lillie.test(rstandard(fit))
+```
 
 Promatranje napretka najboljih igrača
 
