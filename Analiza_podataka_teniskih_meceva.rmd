@@ -485,6 +485,8 @@ for(player_id in dimnames(tri_najbolja)[[1]]) {
     pobjede_po_godinama <- append(pobjede_po_godinama, nrow(tennis[which(tennis$winner_id == player_id & substr(tennis$tourney_date, 1, 4) == godina),])
     / nrow(tennis[which((tennis$winner_id == player_id | tennis$loser_id == player_id) & substr(tennis$tourney_date, 1, 4) == godina),]))
   }
-  plot(godine, pobjede_po_godinama, type="b")
+  plot(godine, pobjede_po_godinama, type="b", main = (tennis[tennis$winner_id == player_id,][1,]$winner_name))
 }
 ```
+
+Možemo vidjeti da najbolji igrači imaju rast prvih 5 do 10 godina, a onda manje više stagniraju.
