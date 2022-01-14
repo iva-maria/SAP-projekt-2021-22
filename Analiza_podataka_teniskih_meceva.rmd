@@ -303,6 +303,10 @@ sortiraniPobjednici = grupiraniPobjednici[order(grupiraniPobjednici$Freq, decrea
 desetNajboljih = head(sortiraniPobjednici, 10)
 ```
 
+2)Jesu li ljevaci nezgodniji protivnici dešnjacima koji igraju jednoručni backhand?
+
+
+Potreban nam je popis svih igrača koji igraju jedoručni backhand
 ```{r}
 library(rvest)
 stranica <- read_html("http://www.tennisdrawchallenge.com/data/list/one-handed-backhand")
@@ -311,17 +315,23 @@ jedno_back <- tables[[1]]
 igraci_1HBH <- jedno_back["Name"]
 lista_1HBH = igraci_1HBH[["Name"]]
 ```
+
+Pomoću dobivenog popisa, izdvojit ćemo sve mečeve u 2 tablice. U jednoj će biti mečevi između igrača koji su dešnjaci i preferiraju jednoručni backhand i igrača koji su ljevaci, a u drugoj tablici će biti biti mečevi između igrača koji su dešnjaci i preferiraju jednoručni backhand i igrača koji su dešnjaci, ali ne igraju jednoručnim backhandom.
 ```{r}
 jedno_back_mecevi_protiv_L = subset(tennis, ((as.character(winner_name) %in% lista_1HBH & !(as.character(loser_name) %in% lista_1HBH) & as.character(winner_hand)=="R" & as.character(loser_hand)=="L") | (as.character(loser_name) %in% lista_1HBH & as.character(loser_hand)=="R" & as.character(winner_hand)=="L" & !(as.character(winner_name) %in% lista_1HBH) )))
 jedno_back_mecevi_protiv_R = subset(tennis, ((as.character(winner_name) %in% lista_1HBH & as.character(winner_hand)=="R" & as.character(loser_hand)=="R") | (as.character(loser_name) %in% lista_1HBH & as.character(loser_hand)=="R" & as.character(winner_hand)=="R")))
+```
+
+Sada je potrebno proći kroz sve pojedine mečeve i provjeriti jesu li igrači s jednoručnim backhandom pobjedili(1) ili izgubili (-1)
+```{r}
 rezultati_L <- data.frame(value = numeric())
 rezultati_R <-data.frame(value = numeric())
-n1=0
-n2=0
+k1=0
+k2=0
 for (i in 1:nrow(jedno_back_mecevi_protiv_L)){
   if (as.character(jedno_back_mecevi_protiv_L[i,"winner_name"] %in% lista_1HBH)){
     rezultati_L[i,"value"] <- 1
-    n1=n1+1
+    k1=k1+1
   } else {
     rezultati_L[i,"value"] <- 0
   }
@@ -329,22 +339,47 @@ for (i in 1:nrow(jedno_back_mecevi_protiv_L)){
 for (i in 1:nrow(jedno_back_mecevi_protiv_R)){
   if (as.character(jedno_back_mecevi_protiv_R[i,"winner_name"] %in% lista_1HBH)){
     rezultati_R[i,"value"] <- 1
-    n2=n2+1
+    k2=k2+1
   } else {
     rezultati_R[i,"value"] <- 0
   }
 }
+n1=nrow(rezultati_L)
+n2=nrow(rezultati_R)
 ```
 
+Sada ćemo nad tim podacima napraviti Test o dvije proporcija.
+
+H0 - Igrači koji igraju desnim jednoručnim backhandom jednako dobro igraju protiv dešnjaka i ljevaka. p1=p2
+H1 - Igračima s desnim jednoručnim backhandom su dešnjaci nezgodniji protivnici od ljevaka p1<p2
+
+$$ \begin{aligned}
+  H_0 & : p_1 = p_2 \\
+  H_1 & : p_1 < p_2 \\
+  \alpha & = 0.01
+\end{aligned} $$
+
+Testiramo nultu hipotezu
+k1,k2 su broj pobjeda
+n1,n2 su broj mečeva
+Z-statistika: 
+$$ \begin{aligned}
+  Z = \frac{\frac{k1}{n1}- \frac{k2}{n2}}{\sqrt{p(1-p) (\frac{1}{n1}+\frac{1}{n2})}} & \sim N(0, 1) \\
+\end{aligned} $$
+Sada slijedi računanje z_vrijednosti i p-vrijednosti
+```{r}
+z_vrijednost = (k1/n1 - k2/n2)/sqrt(((k1+k2)/(n1+n2))*(1-(k1+k2)/(n1+n2))*(1/k1+1/k2))
+z_vrijednost
+pnorm(z_vrijednost)
+```
+p-vrijednosti je manja od 0.01
+Zaključak: Možemo odbaciti nultu hipotezu u korist prve hipoteze na razini značajnosti $\alpha$ = 0.01
 
 ```{r}
-z_vrijednost = (mean(rezultati_L$value)- mean(rezultati_R$value))/sqrt(((n1+n2)/(nrow(rezultati_L)+nrow(rezultati_R)))*(1-(n1+n2)/(nrow(rezultati_L)+nrow(rezultati_R)))*(1/n1+1/n2))
-pnorm(z_vrijednost)
-mean(rezultati_L$value)
-mean(rezultati_R$value)
-#t.test(rezultati_L$value, rezultati_R$value, alt="greater")
+prop.test(c(k1,k2), c(n1,n2), p = NULL,
+          alternative = "less",
+          conf.level = 0.99, correct = TRUE)
 ```
-
 
 ```{r}
 ruke = tennis[c("winner_hand", "loser_hand")]
