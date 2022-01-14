@@ -491,21 +491,6 @@ require(nortest)
 lillie.test(rstandard(fit))
 ```
 
-Promatranje napretka najboljih igrača
-
-```{r}
-tri_najbolja <- sort(table(tennis$winner_id), decreasing=TRUE)[1:3]
-godine <- sort(unique(substr(tennis$tourney_date, 1, 4)))
-for(player_id in dimnames(tri_najbolja)[[1]]) {
-  pobjede_po_godinama <- rep()
-  for(godina in godine) {
-    pobjede_po_godinama <- append(pobjede_po_godinama, nrow(tennis[which(tennis$winner_id == player_id & substr(tennis$tourney_date, 1, 4) == godina),])
-    / nrow(tennis[which((tennis$winner_id == player_id | tennis$loser_id == player_id) & substr(tennis$tourney_date, 1, 4) == godina),]))
-  }
-  plot(godine, pobjede_po_godinama, type="b")
-}
-```
-
 
 Je li odustajanje od meča nezavisno od vrste podloge na kojoj se on igra?
 
@@ -557,4 +542,19 @@ cilic = subset(tennis,(as.character(winner_name)=="Marin Cilic" | as.character(l
 cilic_bof_5 = subset(cilic, as.character(best_of)=="5")
 cilic_superloss = subset(cilic_loss, substr(cilic_loss$score,1,1) < substr(cilic_loss$score,3,3))
 cilic_superduperLoss = 4
+```
+
+Promatranje napretka najboljih igrača
+
+```{r}
+tri_najbolja <- sort(table(tennis$winner_id), decreasing=TRUE)[1:3]
+godine <- sort(unique(substr(tennis$tourney_date, 1, 4)))
+for(player_id in dimnames(tri_najbolja)[[1]]) {
+  pobjede_po_godinama <- rep()
+  for(godina in godine) {
+    pobjede_po_godinama <- append(pobjede_po_godinama, nrow(tennis[which(tennis$winner_id == player_id & substr(tennis$tourney_date, 1, 4) == godina),])
+    / nrow(tennis[which((tennis$winner_id == player_id | tennis$loser_id == player_id) & substr(tennis$tourney_date, 1, 4) == godina),]))
+  }
+  plot(godine, pobjede_po_godinama, type="b")
+}
 ```
