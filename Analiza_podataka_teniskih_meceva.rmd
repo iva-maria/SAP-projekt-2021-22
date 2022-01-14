@@ -59,7 +59,7 @@ summary(tennis)
 
 # Projektna pitanja
 
-U sklopu zadatka postavljena su četiri pitanja, uz mogućnost postavljanja vlastitih pitanja i pokretanja dodatne problematike vezano za dani skup podataka. \textcolor{red}{U slučaju da ipak nećemo postavljati vlastita pitanja, ovaj dio teksta trebalo bi malo izmijeniti.}
+U sklopu zadatka postavljena su četiri pitanja, uz mogućnost postavljanja vlastitih pitanja i pokretanja dodatne problematike vezano za dani skup podataka. Sva su pitanja vezana uz gradivo koje se obrađuje na predmetu Statistička analiza podataka na Fakultetu elektrotehnike i računarstva.
 
 ## Zadana pitanja
 
@@ -192,8 +192,6 @@ qqline(notSoSuccessfulPlayers$player_ht, col = "blue", lwd = 2)
 
 Pod tom pretpostavkom prvo ćemo se pozabaviti jednakošću varijanci, odnosno dokazivanjem iste, a zatim ćemo provesti testove i postaviti hipoteze o jednakosti prosječnih vrijednosti visina uspješnih i onih manje uspješnih igrača.
 
-###Test jednakosti varijanci dviju varijabli
-
 Imamo li na raspolaganju dva nezavisna slučajna uzorka $X_1^1, X_1^2, \ldots X_1^{n_1}$ i $X_2^1, X_2^2, \ldots, X_2^{n_2}$, pod pretpostavkom da oni dolaze iz populacija s normalnom razdiobom i varijancama $\sigma_1^2$ i $\sigma_2^2$, tada slučajna varijabla $$F = \frac{S_{X_1}^2 / \sigma_1^2}{S_{X_2}^2 / \sigma_2^2}$$
 ima Fisherovu razdiobu s $(n_1 - 1, n_2 - 1)$ stupnjeva slobode pri čemu vrijedi: $$S_{X_1}^2 = \frac{1}{n_1 - 1} \sum_{i = 1}^{n_1} (X_1^i - \bar{X}_1)^2, \quad S_{X_2}^2 = \frac{1}{n_2 - 1} \sum_{i = 1}^{n_2} (X_2^i - \bar{X}_2)^2.$$
 Hipoteze testa jednakosti varijanci glase:
@@ -232,120 +230,25 @@ t.test(mostSuccessfulPlayers$player_ht, notSoSuccessfulPlayers$player_ht,
 
 p-vrijednost od 0.00004075 govori nam da trebamo odbaciti nultu hipotezu, odnosno da smijemo zaključiti da su najuspješniji tenisači u prosjeku znatno viši od onih manje uspješnih tenisača.
 
-\textcolor{red}{Provesti test da dokažemo da visine prate normalnu razdiobu, zatim provesti test da s nekom sigurnošću odredimo aritmetičke sredine visina za najuspješnije i one manje uspješne igrače. Naposlijetku provesti test hipoteze da dvije skupine igrača imaju jednaku srednju visinu.}
-
 ### Odnos ljevaka i dešnjaka
 
+Postavljeno pitanje bilo je: Jesu li ljevaci nezgodniji protivnici dešnjacima koji igraju jednoručni backhand? 
 
+Pitanje je interpretirano na malo drugačiji način - provjeravat će se jesu li dešnjaci zapravo nezgodniji protivnici od ljevaka.
 
-### Pobjeda prvog seta
+Postavljene su hipoteze:
+$$ \begin{aligned}
+H_0&: p_1 = p_2\\
+H_1&: p_1 < p_2
+\end{aligned} $$
 
+Nulta hipoteza glasi da je dešnjacima s jednoručnim backhandom jednako nezgodno igrati protiv dešnjaka i ljevaka, dok je alternativna hipoteza da su dešnjaci su nezgodniji protivnici dešnjacima koji igraju s jednoručnim backhandom.
 
-
-### Predviđanje pobjednika meča
-
-
-
-## Vlastita pitanja
-
-***
-
-1) Mozemo li nesto zakljuciti iz distribucije visine najboljih deset igraca u posljednjih 30 godina u odnosu
-na distribuciju visine igraca koji nisu bili tako uspjesni?
-
-Kreiramo novu tablicu u koju rangiramo igrace po broju pobjeda, za pocetak. Raspravljali smo o tome da ih rangiramo po postotku pobjeda, ali to nema smisla zbog toga sto netko npr. moze imati 2/2 pobjede, a netko 19/20. (Postaviti pitanje asistentu.)
-
-```{r}
-pobjednici <- tennis[c("winner_id", "winner_name", "winner_ht")]
-grupiraniPobjednici <- subset(as.data.frame(table(pobjednici)), Freq != 0)
-colnames(grupiraniPobjednici) <- c("player_id", "player_name", "player_ht", "no_of_wins")
-sortiraniPobjednici <- grupiraniPobjednici[order(grupiraniPobjednici$no_of_wins, decreasing = TRUE),]
-desetNajboljih <- head(sortiraniPobjednici, 10)
-```
-
-Problem se pojavio kod traženja igrača koji nisu bili tako uspješni. Naime, nema smisla rangirati ih po najmanjem broju pobjeda, jer će biti puno igrača s 0 ili 1 pobjedom. Isto tako, rangiranje po najmanjem postotku pobjeda ne bi bilo baš sretno rješenje. Iz tog razloga, rangiramo ih po najvećem broju gubitaka i nadamo se da će podaci imati smisla.
-
-Time smo dobili tablicu u kojoj se pojavljuje Andy Murray, što nikako nema smisla. Ovaj kod ispod ne treba gledati!
-
-```{r}
-gubitnici <- tennis[c("loser_id", "loser_name", "loser_ht")]
-grupiraniGubitnici <- subset(as.data.frame(table(gubitnici)), Freq != 0)
-colnames(grupiraniGubitnici) <- c("player_id", "player_name", "player_ht", "no_of_losses")
-sortiraniGubitnici <- grupiraniGubitnici[order(grupiraniGubitnici$no_of_losses, decreasing = TRUE),]
-desetNajlosijih <- head(sortiraniGubitnici, 10)
-```
-
-Sljedeće rješenje, koje smatramo najboljim, jest da 'odsiječemo' igrače s najmanjim brojem mečeva i onda za ostale gledamo najmanji postotak pobjeda.
-
-```{r}
-#full outer join pobjednika i gubitnika
-pobjedeIPorazi <- merge(grupiraniPobjednici, grupiraniGubitnici, all = TRUE)
-
-#mijenja NA s 0 gdje god se pojavljuje da se moze zbrajati
-pobjedeIPorazi[is.na(pobjedeIPorazi)] = 0
-
-#dodajemo novi stupac u kojem pise ukupan broj odigranih meceva
-for (i in 1:nrow(pobjedeIPorazi)) {
-   pobjedeIPorazi$total[i] <- pobjedeIPorazi$no_of_wins[i] + pobjedeIPorazi$no_of_losses[i]
-}
-
-#sortiramo tenisace po ukupnom broju meceva
-pobjedeIPoraziSortirano <- pobjedeIPorazi[order(pobjedeIPorazi$total, decreasing = TRUE),]
-
-#uzimamo samo one koji imaju vise od 100 meceva
-pobjedeIPoraziSortiranoBezNajlosijih <- subset(pobjedeIPoraziSortirano, pobjedeIPoraziSortirano$total >= 100)
-
-#dodajemo novi stupac u kojem pise postotak pobjeda u ukupnom broju meceva
-for(i in 1:nrow(pobjedeIPoraziSortiranoBezNajlosijih)) {
-  pobjedeIPoraziSortiranoBezNajlosijih$win_percentage[i] <- pobjedeIPoraziSortiranoBezNajlosijih$no_of_wins[i] / pobjedeIPoraziSortiranoBezNajlosijih$total[i]
-}
-
-#sortiramo tenisace po postotku pobjeda
-pobjedeIPoraziSortiranoBezNajlosijihSortiranoPoPostotku <- pobjedeIPoraziSortiranoBezNajlosijih[order(pobjedeIPoraziSortiranoBezNajlosijih$win_percentage, decreasing = TRUE),]
-
-#uzmemo one koji imaju <33% pobjede
-najlosiji <- subset(pobjedeIPoraziSortiranoBezNajlosijihSortiranoPoPostotku, pobjedeIPoraziSortiranoBezNajlosijihSortiranoPoPostotku$win_percentage <= 0.34)
-desetNajlosijih <- tail(najlosiji, 10)
-```
-
-Potrebno je sada spojiti igrače s njihovom visinom i odrediti distribuciju tih podataka.
-
-```{r}
-prosjecnaVisinaNajboljih <- mean(as.numeric(as.character(desetNajboljih$player_ht)))
-varijancaVisineNajboljih <- var(as.numeric(as.character(desetNajboljih$player_ht)))
-standardnaDevijacijaVisineNajboljih <- sd(as.numeric(as.character(desetNajboljih$player_ht)))
-```
-
-```{r}
-prosjecnaVisinaNajlosijih <- mean(as.numeric(as.character(desetNajlosijih$player_ht)))
-varijancaVisineNajlosijih <- var(as.numeric(as.character(desetNajlosijih$player_ht)))
-standardnaDevijacijaVisineNajlosijih <- sd(as.numeric(as.character(desetNajlosijih$player_ht)))
-```
-
-Izrađujemo dijagram raspršenja za visinu igrača i postotak pobjeda. Iz nekog razloga, pojavljuju se mali box plotovi unutar scatter plota (pitati asistenta zašto bi to moglo biti).
-
-```{r}
-#x <- pobjedeIPoraziSortiranoBezNajlosijih$player_ht
-#y <- pobjedeIPoraziSortiranoBezNajlosijih$win_percentage
-#plot(x, y, xlab = 'Visina igrača [cm]', ylab = 'Postotak pobjeda')
-```
-
-```{r}
-pobjednici = tennis[c("winner_id", "winner_name")]
-grupiraniPobjednici = subset(as.data.frame(table(pobjednici)), Freq != 0)
-sortiraniPobjednici = grupiraniPobjednici[order(grupiraniPobjednici$Freq, decreasing = TRUE),]
-desetNajboljih = head(sortiraniPobjednici, 10)
-```
-
-2)Jesu li ljevaci nezgodniji protivnici dešnjacima koji igraju jednoručni backhand?
-
-Malo ćemo izmjeniti pitanje. Gledat ćemo jesu li dešnjaci nezgodniji protivnici od ljevaka.
-Postavljamo nultu hipotezu: jednako je zahtjevno dešnjacima s jednoručnim backhandom igrati protiv dešnjaka i ljevaka. Alternativna hipoteza će nam biti da su dešnjaci nezgodniji protivnici.
-Jesu li protivnici zahtjevni, lagani, nezgodniji i slično ćemo promatrati po broju pobjeda naspram odigranim mečevima. Tu imamo dva uzorka i oba uzorka će biti ispunjena isključivo sa dva podatka, pobjeda ili poraz.
+Jesu li protivnici zahtjevni, lagani, nezgodniji i slično promatrat će se po broju pobjeda naspram broja odigranih mečeva. Tu se pojavljuju dva uzorka i oba uzorka će biti ispunjena isključivo sa dva podatka, pobjeda ili poraz.
 Našu hipotezu i takve podatke odlučili smo testirati Testom o dvije proporcije: dva uzorka
 
+Potreban nam je popis svih igrača koji igraju jedoručni backhand.
 
-Potreban nam je popis svih igrača koji igraju jedoručni backhand
 ```{r}
 library(rvest)
 stranica <- read_html("http://www.tennisdrawchallenge.com/data/list/one-handed-backhand")
@@ -355,13 +258,15 @@ igraci_1HBH <- jedno_back["Name"]
 lista_1HBH = igraci_1HBH[["Name"]]
 ```
 
-Pomoću dobivenog popisa, izdvojit ćemo sve mečeve u 2 tablice. U jednoj će biti mečevi između igrača koji su dešnjaci i preferiraju jednoručni backhand i igrača koji su ljevaci, a u drugoj tablici će biti biti mečevi između igrača koji su dešnjaci i preferiraju jednoručni backhand i igrača koji su dešnjaci, ali ne igraju jednoručnim backhandom.
+Pomoću dobivenog popisa, svi mečevi bit će izdvojeni u dvije tablice. U jednoj će biti mečevi između igrača koji su dešnjaci i preferiraju jednoručni backhand i igrača koji su ljevaci, a u drugoj tablici će biti biti mečevi između igrača koji su dešnjaci i preferiraju jednoručni backhand i igrača koji su dešnjaci, ali ne igraju jednoručnim backhandom.
+
 ```{r}
 jedno_back_mecevi_protiv_L = subset(tennis, ((as.character(winner_name) %in% lista_1HBH & !(as.character(loser_name) %in% lista_1HBH) & as.character(winner_hand)=="R" & as.character(loser_hand)=="L") | (as.character(loser_name) %in% lista_1HBH & as.character(loser_hand)=="R" & as.character(winner_hand)=="L" & !(as.character(winner_name) %in% lista_1HBH) )))
 jedno_back_mecevi_protiv_R = subset(tennis, ((as.character(winner_name) %in% lista_1HBH & as.character(winner_hand)=="R" & as.character(loser_hand)=="R") | (as.character(loser_name) %in% lista_1HBH & as.character(loser_hand)=="R" & as.character(winner_hand)=="R")))
 ```
 
-Sada je potrebno proći kroz sve pojedine mečeve i provjeriti jesu li igrači s jednoručnim backhandom pobjedili(1) ili izgubili (-1)
+Sada je potrebno proći kroz sve pojedine mečeve i provjeriti jesu li igrači s jednoručnim backhandom pobjedili(1) ili izgubili (-1).
+
 ```{r}
 rezultati_L <- data.frame(value = numeric())
 rezultati_R <-data.frame(value = numeric())
@@ -387,39 +292,20 @@ n1=nrow(rezultati_L)
 n2=nrow(rezultati_R)
 ```
 
-Sada ćemo nad tim podacima napraviti Test o dvije proporcija.
-
-H0 - Igrači koji igraju desnim jednoručnim backhandom jednako dobro igraju protiv dešnjaka i ljevaka. p1=p2
-H1 - Igračima s desnim jednoručnim backhandom su dešnjaci nezgodniji protivnici od ljevaka p1<p2
-
-$$ \begin{aligned}
-  H_0 & : p_1 = p_2 \\
-  H_1 & : p_1 < p_2 \\
-  \alpha & = 0.01
-\end{aligned} $$
-
-Testiramo nultu hipotezu
-k1,k2 su broj pobjeda
-n1,n2 su broj mečeva
-Z-statistika: 
+Nad tim podacima provodi se Test o dvije proporcije ($k_1, k_2$ predstavljaju broj pobjeda, a $n_1, n_2$ broj mečeva). Korištena je Z-statistika:
 $$ \begin{aligned}
   Z = \frac{\frac{k1}{n1}- \frac{k2}{n2}}{\sqrt{p(1-p) (\frac{1}{n1}+\frac{1}{n2})}} & \sim N(0, 1) \\
 \end{aligned} $$
-Sada slijedi računanje z_vrijednosti i p-vrijednosti
+
+Slijedi računanje z_vrijednosti i p-vrijednosti.
+
 ```{r}
 z_vrijednost = (k1/n1 - k2/n2)/sqrt(((k1+k2)/(n1+n2))*(1-(k1+k2)/(n1+n2))*(1/k1+1/k2))
 z_vrijednost
 pnorm(z_vrijednost)
 ```
-p-vrijednosti je manja od 0.01
-Možemo odbaciti nultu hipotezu u korist prve hipoteze na razini značajnosti $\alpha$ = 0.01
-Zaključujemo da su igračima s desnim jednoručnim backhandom nezgodniji protivnici dešnjaci
 
-```{r}
-prop.test(c(k1,k2), c(n1,n2), p = NULL,
-          alternative = "less",
-          conf.level = 0.99, correct = TRUE)
-```
+p-vrijednost manja od 0.01 upućuje na odbacivanje nulte hipoteze u korist prve hipoteze na razini značajnosti $\alpha$ = 0.01. Zaključujemo da su igračima s desnim jednoručnim backhandom nezgodniji protivnici dešnjaci koji ne preferiraju jednoručni backhand.
 
 ```{r}
 ruke = tennis[c("winner_hand", "loser_hand")]
@@ -430,6 +316,18 @@ grupiraneruke$Freq[2]/nrow(razl_ruke)
 pnorm(grupiraneruke$Freq[1]/nrow(razl_ruke), mean = nrow(razl_ruke) * 0.5, sd = sqrt(nrow(razl_ruke) * 0.25), lower.tail = TRUE)
 
 ```
+
+### Pobjeda prvog seta
+
+
+
+### Predviđanje pobjednika meča
+
+
+
+## Vlastita pitanja
+
+***
 
 Možemo li na temelju dobitnika prvog seta predvidjeti dobitnika cijelog meča?
 
