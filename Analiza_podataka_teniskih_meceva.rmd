@@ -462,11 +462,25 @@ lines(known_ranks$rank_dif, fit$fitted.values, col = 'red')
 ```
 
 ```{r}
-plot(fit$residuals)
 hist(fit$residuals)
 hist(rstandard(fit))
 ```
 
+Pogledamo li histograme reziduala, vidimo da su nakošeni, ali poznato je da je t-distribucija robusna na nenormalnosti pa ćemo svejedno provesti test do kraja.
+
+```{r}
+summary(fit)
+```
+
+Kao što vidimo, dobivamo vrlo mali R^2 te ne možemo zaključiti da su varijable linearno zavisne. Preduvjeti nisu bili dobri, a prividan padajući trend možemo objasniti i brojem odigranih mečeva u kojima su igrači imali sličan rang. Naime, veći ekstremi se prirodno postižu na mjestima brojnijeg uzorkovanja.
+Na grafu možemo uočiti gornju envelopu koja uistinu ima padajući trend, ali također postoji i donja envelopa koja nema takav trend. Mečevi blizu gornje envelope su rijetki i ne utječu toliko na regresiju koliko utječu oni drugi, čisto zbog svoje brojnosti.
+
+Da bi se uvjerili da je ovaj prividan padajući trend uistinu rezultat neravnomjernoj raspoređenosti podataka po horizontalnoj osi, razmotrimo sljedeći graf:
+```{r}
+hist(known_ranks$rank_dif)
+```
+
+Graf potvrđuje tu teoriju.
 
 Je li odustajanje od meča nezavisno od vrste podloge na kojoj se on igra?
 
