@@ -31,8 +31,7 @@ U nastavku teksta analizirat će se skup podataka o teniskim mečevima i tenisa�
 
 Podaci se sastoje od svih ATP mečeva odigranih između 1991. i 2020. godine. Svakom igraču pridodano je više značajki kao što su visina, starost, ruka kojom igra, igra li jednoručni ili dvoručni backhand itd. Dodatno je svaki meč opisan s više značajki poput rankinga pobjednika, rankinga gubitnika, trajanja meča, broja winnera pobjednika, broja neprisiljenih grešaka gubitnika, broja spašenih break prilika i sl.
 
-Jedan redak u tablici skupa podataka sadrži podatke raspoređene u sljedeće stupce (ne moraju sve vrijednosti biti definirane): redni broj podatka, identifikacijska oznaka turnira, naziv turnira, vrsta podloge, broj natjecatelja na turniru, razina turnira, datum održavanja turnira, redni broj meča, rezultat meča, broj setova (*best of x*), razina meča (npr. kvalifikacijski, četvrtfinale, finale) i trajanje meča. Informacije o pobjedniku i gubitniku sadržane su u sljedećim stupcima, za svakog od dvojice igrača zasebno: identifikacijska oznaka, jakosna skupina u ždrijebu, \textcolor{red}{entry}, ime i prezime, dominantna ruka, visina, nacionalnost, dob, \textcolor{red}{ace}, \textcolor{red}{df}, \textcolor{red}{svpt}, \textcolor{red}{1stIn}, \textcolor{red}{1stWon}, \textcolor{red}{2ndWon}, \textcolor{red}{svGms}, \textcolor{red}{bpSaved}, \textcolor{red}{bpFaced}, ranking te ranking bodovi.
-
+Jedan redak u tablici skupa podataka sadrži podatke raspoređene u sljedeće stupce (ne moraju sve vrijednosti biti definirane): redni broj podatka, identifikacijska oznaka turnira, naziv turnira, vrsta podloge, broj natjecatelja na turniru, razina turnira, datum održavanja turnira, redni broj meča, rezultat meča, broj setova (*best of x*), razina meča (npr. kvalifikacijski, četvrtfinale, finale) i trajanje meča. Informacije o pobjedniku i gubitniku sadržane su u sljedećim stupcima, za svakog od dvojice igrača zasebno: identifikacijska oznaka, jakosna skupina u ždrijebu, ime i prezime, dominantna ruka, visina, nacionalnost, dob, ranking itd.
 
 ## Učitavanje skupa podataka
 
@@ -42,13 +41,21 @@ Zadani skup podataka učitan je iz .csv datoteke *tennis_atp_matches.csv*.
 tennis <- read.csv("tennis_atp_matches.csv")
 ```
 
-Odmah na početku jasno je da su neki od podataka suvišni za analizu koja će biti provedena u sklopu projekta pa će odmah na početku odgovarajući stupci biti eliminirani iz tablice radi bolje preglednosti podataka. To su podaci poput naziva i datuma održavanja turnira te rednog broja meča. \textcolor{red}{Ovdje ćemo kasnije dodati sve stupce koje nismo koristili uz objašnjenje da se tih stupaca naša pitanja ne tiču. Slobodno izbacite neke stupce koji vam ipak trebaju. Zakomentirala sam jer mi inače javlja error koji nisam još skužila zašto se pojavljuje.}
+Imena svih varijabli u skupu podataka dana su u nastavku.
 
 ```{r}
-#tennis <- subset(tennis, select = -c(tourney_name, tourney_date, match_num))
+names(tennis)
 ```
+Možemo saznati neke osnovne informacije o skupu podataka, npr. njegove dimenzije, odnosno broj redaka i stupaca.
 
-\textcolor{red}{Možda ovdje dodati neki summary podataka ako budemo imali vremena i volje.}
+```{r}
+dim(tennis)
+```
+Prije odgovaranja na projektna pitanja, ispisat ćemo osnovne podatke o svim varijablama kako bismo se površno upoznali sa skupom podataka.
+
+```{r}
+summary(tennis)
+```
 
 # Projektna pitanja
 
@@ -173,30 +180,57 @@ h_notSoSuccesfulPlayers = hist(notSoSuccessfulPlayers$player_ht,
 Oblik histograma upućuje na to da se podaci ravnaju po normalnoj razdiobi. Da bismo to sa sigurnošću mogli tvrditi, potrebno je provesti test normalnosti varijabli. 
 
 ```{r}
-qqnorm(mostSuccessfulPlayers$player_ht, pch = 20, frame = FALSE, main='Most succesful players')
+qqnorm(mostSuccessfulPlayers$player_ht, pch = 20, frame = FALSE, 
+       main='Najuspješniji igrači')
 qqline(mostSuccessfulPlayers$player_ht, col = "blue", lwd = 2)
 
-qqnorm(notSoSuccessfulPlayers$player_ht, pch = 20, frame = FALSE, main='Less succesful players')
+qqnorm(notSoSuccessfulPlayers$player_ht, pch = 20, frame = FALSE, 
+       main='Manje uspješni igrači')
 qqline(notSoSuccessfulPlayers$player_ht, col = "blue", lwd = 2)
 ```
 Čini se da podaci prate ravnu liniju pa možemo pretpostaviti da je razdioba normalna.
 
 Pod tom pretpostavkom prvo ćemo se pozabaviti jednakošću varijanci, odnosno dokazivanjem iste, a zatim ćemo provesti testove i postaviti hipoteze o jednakosti prosječnih vrijednosti visina uspješnih i onih manje uspješnih igrača.
 
+###Test jednakosti varijanci dviju varijabli
 
-
+Imamo li na raspolaganju dva nezavisna slučajna uzorka $X_1^1, X_1^2, \ldots X_1^{n_1}$ i $X_2^1, X_2^2, \ldots, X_2^{n_2}$, pod pretpostavkom da oni dolaze iz populacija s normalnom razdiobom i varijancama $\sigma_1^2$ i $\sigma_2^2$, tada slučajna varijabla $$F = \frac{S_{X_1}^2 / \sigma_1^2}{S_{X_2}^2 / \sigma_2^2}$$
+ima Fisherovu razdiobu s $(n_1 - 1, n_2 - 1)$ stupnjeva slobode pri čemu vrijedi: $$S_{X_1}^2 = \frac{1}{n_1 - 1} \sum_{i = 1}^{n_1} (X_1^i - \bar{X}_1)^2, \quad S_{X_2}^2 = \frac{1}{n_2 - 1} \sum_{i = 1}^{n_2} (X_2^i - \bar{X}_2)^2.$$
 Hipoteze testa jednakosti varijanci glase:
 $$ \begin{aligned}
 H_0&: \sigma_1^2 = \sigma_2^2 \\
 H_1&: \sigma_1^2 < \sigma_2^2 \quad \text{,} \quad \sigma_1^2 > \sigma_2^2 \quad \text{,} \quad \sigma_1^2 \neq \sigma_2^2
 \end{aligned} $$
-
 Ispitujemo jednakost varijanci prikupljenih uzoraka:
 
 ```{r}
 var.test(mostSuccessfulPlayers$player_ht, notSoSuccessfulPlayers$player_ht)
 ```
 p-vrijednost od 0.04659 govori nam da ne možemo odbaciti hipotezu o jednakosti varijanci, tj. da varijance možemo smatrati jednakima.
+
+Sada se možemo pozabaviti srednjim vrijednostima visine. 
+
+Imamo li na raspolaganju dva nezavisna slučajna uzorka $X_1^1, X_1^2, \ldots, X_1^{n_1}$ i $X_2^1, X_2^2, \ldots, X_2^{n_2}$, pod pretpostavkom da oni dolaze iz populacija s normalnom razdiobom s očekivanjima $\mu_1$ i $\mu_2$ te s nepoznatim, ali jednakim varijancama $\sigma$. Zajednička disperzija uzorka računa se kao težinska sredina disperzija $S_{X_1}$ i $S_{X_2}$: $$S_X^2 = \frac{1}{n_1 + n_2 - 2} [(n_1 - 1) S_{X_1}^2 + (n_2 - 1) S_{X_2}^2].$$
+Slučajna varijabla $$Z = \frac{\bar{X}_1 - \bar{X}_2 - (\mu_1 - \mu_2)}{\sigma \sqrt{\frac{1}{n_1} + \frac{1}{n_2}}}$$
+ima jediničnu normalnu razdiobu, a slučajna varijabla $$W^2 = \frac{(n_1 - 1) S_{X_1}^2 + (n_2 - 1) S_{X_2}^2}{\sigma^2}$$
+ima $\chi^2$ razdiobu s $n_1 + n_2 - 2$ stupnja slobode. Iz tog razloga možemo reći da slučajna varijabla $$T = \frac{Z \sqrt{n_1 + n_2 - 2}}{W} = \frac{\bar{X}_1 - \bar{X}_2 - (\mu_1 - \mu_2)}{S_X \sqrt{\frac{1}{n_1} + \frac{1}{n_2}}}$$
+ima egzaktnu $t$ razdiobu s $n_1 + n_2 - 2$ stupnja slobode.
+
+Hipoteze testa jednakosti srednjih vrijednosti glase:
+$$ \begin{aligned}
+H_0&: \mu_1 = \mu_2 \\
+H_1&: \mu_1 < \mu_2 \quad \text{,} \quad \mu_1 > \mu_2 \quad \text{,} \quad \mu_1 \neq \mu_2
+\end{aligned} $$
+Test možemo provesti samo pod pretpostavkom da uzorak dolazi iz populacije koja prati normalnu razdiobu, što imamo. Također, uzorci moraju biti nezavisni, što je i slučaj kod igrača koji dolaze iz dvije različite skupine.
+
+Provedimo sada t-test uz pretpostavku jednakosti varijanci:
+
+```{r}
+t.test(mostSuccessfulPlayers$player_ht, notSoSuccessfulPlayers$player_ht, 
+       alt = "greater", var.equal = TRUE)
+```
+
+p-vrijednost od 0.00004075 govori nam da trebamo odbaciti nultu hipotezu, odnosno da smijemo zaključiti da su najuspješniji tenisači u prosjeku znatno viši od onih manje uspješnih tenisača.
 
 \textcolor{red}{Provesti test da dokažemo da visine prate normalnu razdiobu, zatim provesti test da s nekom sigurnošću odredimo aritmetičke sredine visina za najuspješnije i one manje uspješne igrače. Naposlijetku provesti test hipoteze da dvije skupine igrača imaju jednaku srednju visinu.}
 
@@ -477,13 +511,12 @@ lines(known_ranks$rank_dif, fit$fitted.values, col = 'red')
 ```
 
 ```{r}
-plot(fit$residuals)
-hist(fit$residuals)
-hist(rstandard(fit))
-qqnorm(rstandard(fit))
-qqline(rstandard(fit))
-require(nortest)
-lillie.test(rstandard(fit))
+#plot(fit$residuals)
+#hist(fit$residuals)
+#hist(rstandard(fit))
+#qqnorm(rstandard(fit))
+#qqline(rstandard(fit))
+#require(nortest)
 ```
 
 Promatranje napretka najboljih igrača
@@ -524,7 +557,6 @@ added_margins_tbl = addmargins(tbl)
 print(added_margins_tbl)
 ```
 
-# promijenit malo tekst jer je prepisan
 Test nezavisnosti $\chi^2$ test u programskom paketu R implementiran je u funkciji `chisq.test()` koja kao ulaz prima kontingencijsku tablicu podataka koje testiramo na nezavisnost. Ispitat ćemo nezavisnost podloge teniskog terena i odustajanja od meča.
 
 Pretpostavka testa je da očekivana frekvencija pojedinog razreda mora biti veća ili jednaka 5 (`chisq.test()` pretpostavlja da je ovaj uvjet zadovoljen stoga je prije provođenja testa potrebno to provjeriti).
