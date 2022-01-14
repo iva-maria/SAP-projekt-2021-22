@@ -393,14 +393,25 @@ full_sets <- tennis[!grepl("[A-Za-z]", tennis$score),]
 #  if(i %% 10000 == 0) print(i)
 #}
 bo3 = full_sets[full_sets$best_of == 3,]
-sum(substr(bo3$score, 1, 1) > substr(bo3$score, 3, 3)) / nrow(bo3)
+podatkovna_vjerojatnost = sum(substr(bo3$score, 1, 1) > substr(bo3$score, 3, 3)) / nrow(bo3)
 n = nrow(bo3)
 p = 0.75
 o = sum(substr(bo3$score, 1, 1) > substr(bo3$score, 3, 3))
+print(podatkovna_vjerojatnost)
 pnorm(o, mean = n * p, sd = sqrt(n * p * (1 - p)), lower.tail = FALSE)
 ```
 Vidimo da postotak takvih mečeva iznosi otprilike 82%. p-vrijednost je praktički 0.
-Odbacujemo H0 i zaključujemo da su dobitnici prvog seta u prosjeku bolji igrači (imaju veću vjerojatnost dobitka pojedinog seta).
+Odbacujemo H0 na jako velikoj razini značajnosti i zaključujemo da su dobitnici prvog seta u prosjeku bolji igrači (imaju veću vjerojatnost dobitka pojedinog seta).
+
+Rezultate ovog testa možemo prikazati i grafički:
+```{r}
+p1 <- hist(rep(1, times = n * p))
+p2 <- hist(rep(1, times = o))
+plot(p2, col=rgb(0,1,0,1/2), add=T)
+plot(p1, col=rgb(0,0,1,1/2), add=T)
+```
+
+Zelenom bojom je prikazan višak opaženih u odnosu na očekivane mečeve. Razlika je manja od 5000 mečeva, ali je s danim parametrima distribucije i više nego dovoljna da opovrgne H0.
 
 ```{r}
 unfinished_sets <- tennis[grepl("[A-Za-z]", tennis$score),]
@@ -414,7 +425,7 @@ Pretpostavka je da igrači sličnijeg ranga igraju dulje mečeve.
 
 ```{r}
 library(dplyr)
-known_ranks = na.omit(full_sets[,c("minutes", "winner_rank", "loser_rank")])
+known_ranks = na.omit(bo3[,c("minutes", "winner_rank", "loser_rank")])
 known_ranks = arrange(known_ranks[known_ranks$minutes < 500,], desc(minutes)) # 700
 known_ranks$rank_dif = abs(known_ranks$winner_rank - known_ranks$loser_rank)
 fit.ranks = lm(minutes~rank_dif, data = known_ranks)
