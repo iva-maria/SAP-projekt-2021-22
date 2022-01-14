@@ -373,7 +373,8 @@ z_vrijednost
 pnorm(z_vrijednost)
 ```
 p-vrijednosti je manja od 0.01
-Zaključak: Možemo odbaciti nultu hipotezu u korist prve hipoteze na razini značajnosti $\alpha$ = 0.01
+Možemo odbaciti nultu hipotezu u korist prve hipoteze na razini značajnosti $\alpha$ = 0.01
+Zaključujemo da su igračima s desnim jednoručnim backhandom nezgodniji protivnici dešnjaci
 
 ```{r}
 prop.test(c(k1,k2), c(n1,n2), p = NULL,
