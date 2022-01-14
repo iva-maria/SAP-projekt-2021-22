@@ -305,6 +305,11 @@ desetNajboljih = head(sortiraniPobjednici, 10)
 
 2)Jesu li ljevaci nezgodniji protivnici dešnjacima koji igraju jednoručni backhand?
 
+Malo ćemo izmjeniti pitanje. Gledat ćemo jesu li dešnjaci nezgodniji protivnici od ljevaka.
+Postavljamo nultu hipotezu: jednako je zahtjevno dešnjacima s jednoručnim backhandom igrati protiv dešnjaka i ljevaka. Alternativna hipoteza će nam biti da su dešnjaci nezgodniji protivnici.
+Jesu li protivnici zahtjevni, lagani, nezgodniji i slično ćemo promatrati po broju pobjeda naspram odigranim mečevima. Tu imamo dva uzorka i oba uzorka će biti ispunjena isključivo sa dva podatka, pobjeda ili poraz.
+Našu hipotezu i takve podatke odlučili smo testirati Testom o dvije proporcije: dva uzorka
+
 
 Potreban nam je popis svih igrača koji igraju jedoručni backhand
 ```{r}
@@ -544,3 +549,12 @@ Očekivane frekvencije su veće od 5 što znači da možemo nastaviti sa $\chi^2
 chisq.test(tbl,correct=F)
 ```
 Odbacujemo H0 u korist H1 koja kaže da su podloga teniskog terena i odustajanje od meča zavisni.
+
+#Čilić
+
+```{r}
+cilic = subset(tennis,(as.character(winner_name)=="Marin Cilic" | as.character(loser_name) == "Marin Cilic"))
+cilic_bof_5 = subset(cilic, as.character(best_of)=="5")
+cilic_superloss = subset(cilic_loss, substr(cilic_loss$score,1,1) < substr(cilic_loss$score,3,3))
+cilic_superduperLoss = 4
+```
