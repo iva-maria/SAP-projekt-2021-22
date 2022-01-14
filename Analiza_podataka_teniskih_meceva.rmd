@@ -419,20 +419,6 @@ Izračunajmo sada postotak mečeva u kojem je dobitnik prvog seta dobio meč te 
 
 ```{r}
 full_sets <- tennis[!grepl("[A-Za-z]", tennis$score),]
-#to_kaj_ocu = gregexpr(pattern = '-', full_sets$score)
-#i = 1
-#first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on = full_sets[FALSE,]
-#for(to in to_kaj_ocu) {
-#  if((length(to) == 2 || (length(to) == 3 &&
-#        ((substr(full_sets[i,]$score, to[1] - 1, to[1] - 1) < substr(full_sets[i,]$score, to[1] + 1, to[1] + 1))
-#      || (substr(full_sets[i,]$score, to[2] - 1, to[2] - 1) < substr(full_sets[i,]$score, to[2] + 1, to[2] + 1))))) == TRUE) {
-#    first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on[
-#      nrow(first_to_2_sets_wins_I_mean_why_are_there_even_other_types_of_matches_just_to_annoy_poor_students_working_on_their_projects_I_mean_come_on) + 1,
-#    ] = full_sets[i,]
-#  }
-#  i = i + 1
-#  if(i %% 10000 == 0) print(i)
-#}
 bo3 = full_sets[full_sets$best_of == 3,]
 podatkovna_vjerojatnost = sum(substr(bo3$score, 1, 1) > substr(bo3$score, 3, 3)) / nrow(bo3)
 n = nrow(bo3)
@@ -454,13 +440,6 @@ plot(p1, col=rgb(0,0,1,1/2), add=T)
 
 Zelenom bojom je prikazan višak opaženih u odnosu na očekivane mečeve. Razlika je manja od 5000 mečeva, ali je s danim parametrima distribucije i više nego dovoljna da opovrgne H0.
 
-```{r}
-unfinished_sets <- tennis[grepl("[A-Za-z]", tennis$score),]
-unfinished_ages <- round(unfinished_sets[c("loser_age")])
-grupirani_unf <- subset(as.data.frame(table(unfinished_ages)), Freq != 0)
-plot(grupirani_unf)
-```
-
 Promotrimo vezu između razlike u rangu i trajanja meča.
 Pretpostavka je da igrači sličnijeg ranga igraju dulje mečeve.
 
@@ -470,6 +449,7 @@ library(dplyr)
 known_ranks = na.omit(bo3[,c("minutes", "winner_rank", "loser_rank")])
 known_ranks = arrange(known_ranks[known_ranks$minutes < 500,], desc(minutes)) # postoje par nerealnih mečeva preko 1000 minuta
 known_ranks$rank_dif = abs(known_ranks$winner_rank - known_ranks$loser_rank)
+plot(known_ranks$rank_dif, known_ranks$minutes)
 ```
 
 Vidimo da podaci imaju padajući trend, ali također vidimo i kratke mečeve slično rangiranih igrača. To možemo objasniti količinom podatka, pogotovo onih gdje su igrači sličnog ranga. Zato ćemo nastaviti s provođenjem regresijskog testa.
@@ -485,10 +465,6 @@ lines(known_ranks$rank_dif, fit$fitted.values, col = 'red')
 plot(fit$residuals)
 hist(fit$residuals)
 hist(rstandard(fit))
-qqnorm(rstandard(fit))
-qqline(rstandard(fit))
-require(nortest)
-lillie.test(rstandard(fit))
 ```
 
 
@@ -542,6 +518,15 @@ cilic = subset(tennis,(as.character(winner_name)=="Marin Cilic" | as.character(l
 cilic_bof_5 = subset(cilic, as.character(best_of)=="5")
 cilic_superloss = subset(cilic_loss, substr(cilic_loss$score,1,1) < substr(cilic_loss$score,3,3))
 cilic_superduperLoss = 4
+```
+
+TODO Antonio opis
+
+```{r}
+unfinished_sets <- tennis[grepl("[A-Za-z]", tennis$score),]
+unfinished_ages <- round(unfinished_sets[c("loser_age")])
+grupirani_unf <- subset(as.data.frame(table(unfinished_ages)), Freq != 0)
+plot(grupirani_unf)
 ```
 
 Promatranje napretka najboljih igrača
